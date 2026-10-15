@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* SONET STOCK AI design tokens */
+:root,
+[data-theme="dark"] {
+  --bg: #101310;
+  --bg-secondary: #181d19;
+  --card: #1c231e;
+  --green: #159447;
+  --green-bright: #25c96a;
+  --red: #e63946;
+  --text: #f4f7f4;
+  --text-secondary: #a7b2a9;
+  --border: #303a32;
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #f4f7f4;
+  --bg-secondary: #e9efe9;
+  --card: #ffffff;
+  --green: #159447;
+  --green-bright: #159447;
+  --red: #d13438;
+  --text: #101310;
+  --text-secondary: #4c5a4e;
+  --border: #d5ddd5;
+  --shadow: 0 8px 24px rgba(16, 19, 16, 0.08);
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--green);
+  color: #fff;
+}
+
+/* thin scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+}
+
+/* focus visibility for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--green-bright);
+  outline-offset: 2px;
+}
+
+/* skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton-shimmer {
+  background: linear-gradient(90deg, var(--card) 25%, var(--bg-secondary) 50%, var(--card) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+/* transparency checkerboard (preview only — real exports keep genuine alpha) */
+.checkerboard {
+  background-image:
+    linear-gradient(45deg, #3a3f3b 25%, transparent 25%),
+    linear-gradient(-45deg, #3a3f3b 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #3a3f3b 75%),
+    linear-gradient(-45deg, transparent 75%, #3a3f3b 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  background-color: #2a2f2b;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out;
+}
