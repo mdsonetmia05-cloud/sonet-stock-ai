@@ -294,8 +294,9 @@ export default function BatchEditorPage() {
         <FileDropzone
           accept={ACCEPT}
           onFiles={addFiles}
-          label="Drag and drop images for batch processing"
-          hint="JPG, PNG, WebP supported. Prompts are generated with on-device heuristics (demo mode)."
+          label="Drag and drop images (PNG, JPG, WebP)"
+          hint="Prompts are generated with on-device heuristics (demo mode)."
+          formats={["PNG", "JPG", "WEBP"]}
         />
       ) : (
         <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
@@ -382,7 +383,7 @@ export default function BatchEditorPage() {
                         aria-label={`Output name for ${it.file.name}`}
                         className="!h-8 !py-1 text-sm font-medium"
                       />
-                      <Badge tone={it.status === "done" ? "green" : it.status === "failed" ? "red" : it.status === "processing" ? "blue" : "neutral"}>
+                      <Badge tone={it.status === "done" ? "success" : it.status === "failed" ? "red" : it.status === "processing" ? "blue" : "neutral"}>
                         {it.status}
                       </Badge>
                       <span className="text-[11px] text-muted">{formatBytes(it.file.size)} · {truncate(it.file.name, 32)}</span>

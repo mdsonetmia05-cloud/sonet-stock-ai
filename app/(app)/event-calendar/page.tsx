@@ -40,8 +40,8 @@ const PRIORITY_TONE: Record<StockEvent["priority"], "red" | "amber" | "neutral">
   high: "red", medium: "amber", low: "neutral",
 };
 
-const DATE_TYPE_TONE: Record<EventDateType, "green" | "blue" | "amber"> = {
-  verified: "green", computed: "blue", approximate: "amber",
+const DATE_TYPE_TONE: Record<EventDateType, "success" | "blue" | "amber"> = {
+  verified: "success", computed: "blue", approximate: "amber",
 };
 
 const DRAFT_KEY = "ssa:v1:draft:prompt-idea";

@@ -22,6 +22,10 @@ import {
   Minus,
   Menu,
   X,
+  Camera,
+  Code2,
+  Clapperboard,
+  Megaphone,
 } from "lucide-react";
 
 const FEATURES = [
@@ -40,6 +44,13 @@ const STEPS = [
   { icon: Search, title: "Research an opportunity", desc: "Check the event calendar and plan a shoot or generation topic with structured research notes." },
   { icon: PencilLine, title: "Create and optimize assets", desc: "Generate prompts, prepare files, and write marketplace-ready metadata — all on-device in demo mode." },
   { icon: ClipboardCheck, title: "Review and prepare for submission", desc: "Run rejection-risk checks, export your files and metadata, then submit directly to each marketplace." },
+];
+
+const CREATORS = [
+  { icon: Camera, title: "Stock Contributors", desc: "Generate platform-optimized prompts for Adobe Stock, Shutterstock & Freepik with correct style targeting." },
+  { icon: Code2, title: "Developers", desc: "Create detailed coding prompts, debugging instructions and technical docs for ChatGPT, Claude and Copilot." },
+  { icon: Clapperboard, title: "Video Creators", desc: "Script cinematic multi-scene prompts with character control, camera angles and mood direction for AI video." },
+  { icon: Megaphone, title: "Marketers", desc: "Draft marketing emails, ad copy, SWOT analyses and campaign strategies with AI-optimized prompt structure." },
 ];
 
 const PLATFORMS = ["Adobe Stock", "Shutterstock", "Freepik", "Vecteezy", "Dreamstime", "Depositphotos", "123RF"];
@@ -78,7 +89,7 @@ const FAQS = [
 function PreviewMock() {
   const bars = [42, 68, 55, 80, 62, 90, 74, 58, 84, 66, 78, 52];
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
+    <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-2xl">
       {/* browser chrome */}
       <div className="flex items-center gap-1.5 border-b border-border bg-secondary px-4 py-3">
         <span className="h-2.5 w-2.5 rounded-full bg-danger/70" />
@@ -122,14 +133,14 @@ function PreviewMock() {
               ["Prompts saved", "32"],
               ["Research notes", "12"],
             ].map(([label, val]) => (
-              <div key={label} className="rounded-xl border border-border bg-secondary/60 p-3">
+              <div key={label} className="rounded-2xl border border-border bg-secondary/60 p-3">
                 <div className="text-[10px] uppercase tracking-wide text-muted">{label}</div>
                 <div className="mt-0.5 text-xl font-bold text-foreground">{val}</div>
               </div>
             ))}
           </div>
           <div className="grid gap-2.5 sm:grid-cols-2">
-            <div className="rounded-xl border border-border bg-secondary/60 p-3">
+            <div className="rounded-2xl border border-border bg-secondary/60 p-3">
               <div className="mb-2 text-[11px] font-medium text-foreground">
                 Weekly activity <span className="ml-1 rounded bg-secondary px-1.5 py-0.5 text-[9px] text-muted">SAMPLE</span>
               </div>
@@ -139,16 +150,16 @@ function PreviewMock() {
                 ))}
               </div>
             </div>
-            <div className="rounded-xl border border-border bg-secondary/60 p-3">
+            <div className="rounded-2xl border border-border bg-secondary/60 p-3">
               <div className="mb-2 text-[11px] font-medium text-foreground">Recent jobs</div>
               {[
-                ["Eid campaign metadata", "completed", "green"],
+                ["Eid campaign metadata", "completed", "blue"],
                 ["Portrait batch upscaling", "processing", "amber"],
-                ["Winter keyword research", "completed", "green"],
+                ["Winter keyword research", "completed", "blue"],
               ].map(([t, s, tone]) => (
                 <div key={t} className="mb-1.5 flex items-center justify-between rounded-lg bg-background px-2.5 py-1.5">
                   <span className="text-[11px] text-foreground">{t}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[9px] ${tone === "green" ? "bg-primary/15 text-primaryBright" : "bg-amber-500/15 text-amber-400"}`}>{s}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[9px] ${tone === "blue" ? "bg-primary/15 text-primaryBright" : "bg-amber-500/15 text-amber-400"}`}>{s}</span>
                 </div>
               ))}
             </div>
@@ -181,18 +192,59 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
+function BlueCard({
+  icon: Icon,
+  title,
+  desc,
+  href,
+  step,
+}: {
+  icon: React.ComponentType<{ size?: number | string; className?: string }>;
+  title: string;
+  desc: string;
+  href?: string;
+  step?: string;
+}) {
+  const inner = (
+    <>
+      {step && (
+        <span className="mb-5 block text-sm font-bold tracking-widest text-white/60">0{step}</span>
+      )}
+      <span className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
+        <Icon size={22} className="text-white" />
+      </span>
+      <h3 className="text-lg font-bold text-white">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-white/80">{desc}</p>
+      {href && (
+        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-white">
+          Open tool <ArrowRight size={15} />
+        </span>
+      )}
+    </>
+  );
+  const cls =
+    "rounded-3xl bg-gradient-to-br from-[#1d4ed8] to-[#2563eb] p-7 text-left transition-transform hover:-translate-y-0.5";
+  return href ? (
+    <Link href={href} className={`group block ${cls}`}>
+      {inner}
+    </Link>
+  ) : (
+    <div className={cls}>{inner}</div>
+  );
+}
+
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* top nav */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-border bg-[#0a0a0f]/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white">
               <Sparkles size={18} />
             </span>
-            <span className="text-sm font-bold tracking-tight">
+            <span className="text-sm font-extrabold tracking-tight">
               SONET <span className="text-primaryBright">STOCK AI</span>
             </span>
           </Link>
@@ -203,7 +255,7 @@ export default function HomePage() {
             <a href="#faq" className="transition-colors hover:text-foreground">FAQ</a>
           </nav>
           <div className="hidden items-center gap-2 md:flex">
-            <Link href="/dashboard" className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-white transition-all hover:brightness-110">
+            <Link href="/dashboard" className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-white transition-all hover:brightness-110">
               <LayoutDashboard size={16} /> Open Workspace
             </Link>
           </div>
@@ -224,7 +276,7 @@ export default function HomePage() {
                   {label}
                 </a>
               ))}
-              <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="mt-1 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-white">
+              <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="mt-1 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-white">
                 <LayoutDashboard size={16} /> Open Workspace
               </Link>
             </div>
@@ -240,13 +292,13 @@ export default function HomePage() {
           </span>
           <h1 className="text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
             Ideas Become Income.<br />
-            <span className="text-primaryBright">Create Smarter with AI.</span>
+            Create Smarter with AI.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted md:text-lg">
             Research stock trends, generate commercial-ready prompts, optimize metadata, and manage your creative workflow from one workspace.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/dashboard" className="inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-7 text-base font-medium text-white transition-all hover:brightness-110">
+            <Link href="/dashboard" className="inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-7 text-base font-semibold text-white transition-all hover:brightness-110">
               <LayoutDashboard size={18} /> Open Workspace <ArrowRight size={18} />
             </Link>
             <a href="#tools" className="inline-flex h-12 items-center gap-2 rounded-xl border border-border bg-secondary px-7 text-base font-medium text-foreground transition-all hover:bg-card">
@@ -265,7 +317,7 @@ export default function HomePage() {
       </section>
 
       {/* features */}
-      <section id="tools" className="border-t border-border bg-secondary/40">
+      <section id="tools" className="border-t border-border">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-20">
           <div className="mb-10 text-center">
             <h2 className="text-2xl font-bold md:text-3xl">Nine tools, one workflow</h2>
@@ -275,48 +327,45 @@ export default function HomePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
-              <Link
-                key={f.href}
-                href={f.href}
-                className="group rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg"
-              >
-                <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primaryBright">
-                  <f.icon size={20} />
-                </span>
-                <h3 className="text-base font-semibold">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{f.desc}</p>
-                <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primaryBright">
-                  Open tool <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
-                </span>
-              </Link>
+              <BlueCard key={f.href} href={f.href} icon={f.icon} title={f.title} desc={f.desc} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* workflow */}
+      {/* workflow — 3 steps */}
       <section id="workflow" className="border-t border-border">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-20">
           <div className="mb-10 text-center">
-            <h2 className="text-2xl font-bold md:text-3xl">From idea to submission in three steps</h2>
+            <h2 className="text-2xl font-bold md:text-3xl">Generate AI Prompts in 3 Easy Steps</h2>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-muted">
+              From idea to submission in three steps.
+            </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {STEPS.map((s, i) => (
-              <div key={s.title} className="relative rounded-2xl border border-border bg-card p-6">
-                <span className="absolute right-5 top-5 text-5xl font-extrabold text-secondary">{i + 1}</span>
-                <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white">
-                  <s.icon size={20} />
-                </span>
-                <h3 className="text-base font-semibold">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{s.desc}</p>
-              </div>
+              <BlueCard key={s.title} step={String(i + 1)} icon={s.icon} title={s.title} desc={s.desc} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* built for every creator */}
+      <section className="border-t border-border">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-20">
+          <div className="mb-10 text-center">
+            <h2 className="text-2xl font-bold md:text-3xl">Built for Every Creator</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {CREATORS.map((c) => (
+              <BlueCard key={c.title} icon={c.icon} title={c.title} desc={c.desc} />
             ))}
           </div>
         </div>
       </section>
 
       {/* platforms */}
-      <section id="platforms" className="border-t border-border bg-secondary/40">
+      <section id="platforms" className="border-t border-border">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
           <div className="text-center">
             <h2 className="text-xl font-bold md:text-2xl">Prepare files for the marketplaces you sell on</h2>
@@ -349,14 +398,14 @@ export default function HomePage() {
       </section>
 
       {/* footer */}
-      <footer className="border-t border-border bg-secondary/40">
+      <footer className="border-t border-border bg-[#0a0a0f]">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white">
                 <Sparkles size={15} />
               </span>
-              <span className="text-sm font-bold">SONET <span className="text-primaryBright">STOCK AI</span></span>
+              <span className="text-sm font-extrabold">SONET <span className="text-primaryBright">STOCK AI</span></span>
             </div>
             <div className="flex gap-5 text-sm text-muted">
               <Link href="/dashboard" className="hover:text-foreground">Workspace</Link>

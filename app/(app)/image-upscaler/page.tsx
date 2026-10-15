@@ -305,8 +305,9 @@ export default function ImageUpscalerPage() {
             <FileDropzone
               accept={ACCEPT}
               onFiles={addFiles}
-              label="Drag and drop images to upscale"
-              hint="JPG, PNG, WebP. Files are processed one at a time in your browser."
+              label="Drag and drop images (PNG, JPG, WebP)"
+              hint="Files are processed one at a time in your browser."
+              formats={["PNG", "JPG", "WEBP"]}
             />
           </div>
         </>
@@ -330,7 +331,7 @@ export default function ImageUpscalerPage() {
                           value={s}
                           checked={scale === s}
                           onChange={() => setScale(s)}
-                          style={{ accentColor: "var(--green-bright)" }}
+                          style={{ accentColor: "var(--blue-bright)" }}
                         />
                         {s}x
                       </label>
@@ -348,7 +349,7 @@ export default function ImageUpscalerPage() {
                     value={denoise}
                     onChange={(e) => setDenoise(Number(e.target.value))}
                     className="w-full"
-                    style={{ accentColor: "var(--green-bright)" }}
+                    style={{ accentColor: "var(--blue-bright)" }}
                     aria-describedby="iu-denoise-hint"
                   />
                   <p id="iu-denoise-hint" className="mt-1 text-[11px] text-muted">
@@ -366,7 +367,7 @@ export default function ImageUpscalerPage() {
                     value={sharpen}
                     onChange={(e) => setSharpen(Number(e.target.value))}
                     className="w-full"
-                    style={{ accentColor: "var(--green-bright)" }}
+                    style={{ accentColor: "var(--blue-bright)" }}
                     aria-describedby="iu-sharpen-hint"
                   />
                   <p id="iu-sharpen-hint" className="mt-1 text-[11px] text-muted">
@@ -457,7 +458,7 @@ export default function ImageUpscalerPage() {
                         {truncate(it.file.name, 40)}
                       </p>
                       <Badge
-                        tone={it.status === "done" ? "green" : it.status === "failed" ? "red" : it.status === "processing" ? "blue" : "neutral"}
+                        tone={it.status === "done" ? "success" : it.status === "failed" ? "red" : it.status === "processing" ? "blue" : "neutral"}
                       >
                         {it.status}
                       </Badge>
