@@ -522,8 +522,10 @@ export default function ImageToPromptPage() {
               multiple
               maxFiles={MAX_FILES}
               onFiles={addFiles}
-              label="Drag and drop images here"
-              hint="JPG, JPEG, PNG or WebP · up to 20 files · analyzed on-device"
+              label="Drag and drop images (PNG, JPG, WebP)"
+              hint="Analyzed on-device."
+              batchLimit={MAX_FILES}
+              formats={["PNG", "JPG", "WEBP"]}
             />
             <input
               ref={replaceInputRef}
@@ -664,7 +666,7 @@ export default function ImageToPromptPage() {
                       <div className="absolute left-2 top-2">
                         <Badge
                           tone={
-                            item.status === "done" ? "green" : item.status === "error" ? "red" : item.status === "analyzing" ? "blue" : "neutral"
+                            item.status === "done" ? "success" : item.status === "error" ? "red" : item.status === "analyzing" ? "blue" : "neutral"
                           }
                         >
                           {item.status === "done" ? "Prompt ready" : item.status === "error" ? "Failed" : item.status === "analyzing" ? "Analyzing…" : "Pending"}

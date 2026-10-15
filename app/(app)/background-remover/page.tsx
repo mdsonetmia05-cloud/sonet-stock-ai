@@ -302,8 +302,9 @@ export default function BackgroundRemoverPage() {
           <FileDropzone
             accept={ACCEPT}
             onFiles={addFiles}
-            label="Drag and drop images to remove backgrounds"
-            hint="JPG, PNG, WebP. Files are processed one at a time in your browser."
+            label="Drag and drop images (PNG, JPG, WebP)"
+            hint="Files are processed one at a time in your browser."
+            formats={["PNG", "JPG", "WEBP"]}
           />
         </div>
       )}
@@ -325,7 +326,7 @@ export default function BackgroundRemoverPage() {
                     value={tolerance}
                     onChange={(e) => setTolerance(Number(e.target.value))}
                     className="w-full"
-                    style={{ accentColor: "var(--green-bright)" }}
+                    style={{ accentColor: "var(--blue-bright)" }}
                     aria-describedby="br-tolerance-hint"
                   />
                   <p id="br-tolerance-hint" className="mt-1 text-[11px] text-muted">
@@ -350,7 +351,7 @@ export default function BackgroundRemoverPage() {
                           value={value}
                           checked={bgChoice === value}
                           onChange={() => setBgChoice(value)}
-                          style={{ accentColor: "var(--green-bright)" }}
+                          style={{ accentColor: "var(--blue-bright)" }}
                         />
                         {labelText}
                       </label>
@@ -453,7 +454,7 @@ export default function BackgroundRemoverPage() {
                         {truncate(it.file.name, 40)}
                       </p>
                       <Badge
-                        tone={it.status === "done" ? "green" : it.status === "failed" ? "red" : it.status === "processing" ? "blue" : "neutral"}
+                        tone={it.status === "done" ? "success" : it.status === "failed" ? "red" : it.status === "processing" ? "blue" : "neutral"}
                       >
                         {it.status}
                       </Badge>

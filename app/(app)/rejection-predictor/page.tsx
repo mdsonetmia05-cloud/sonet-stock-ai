@@ -159,12 +159,12 @@ function evaluate(img: AnalyzedImage, unchecked: Set<GuidelineId>): RiskResult {
 }
 
 const RISK_META = {
-  low: { label: "Low Risk", Icon: ShieldCheck, tone: "green" as const, text: "No major technical issues detected. Still review the checklist before upload." },
+  low: { label: "Low Risk", Icon: ShieldCheck, tone: "success" as const, text: "No major technical issues detected. Still review the checklist before upload." },
   review: { label: "Review Recommended", Icon: ShieldAlert, tone: "amber" as const, text: "One or more issues found — fix the warned items before submitting." },
   high: { label: "High Risk", Icon: ShieldX, tone: "red" as const, text: "Fail-level issues detected. This file is very likely to be rejected — fix and re-check." },
 };
 
-const LEVEL_TONE: Record<QcFinding["level"], "green" | "amber" | "red"> = { pass: "green", warn: "amber", fail: "red" };
+const LEVEL_TONE: Record<QcFinding["level"], "success" | "amber" | "red"> = { pass: "success", warn: "amber", fail: "red" };
 
 const ACCEPT_EXTS = ["jpg", "jpeg", "png", "webp"];
 
@@ -361,8 +361,10 @@ export default function RejectionPredictorPage() {
           multiple
           maxFiles={12}
           onFiles={handleFiles}
-          label="Drop images to analyze"
-          hint="JPG, PNG, or WebP. Analysis runs fully in your browser."
+          label="Drag and drop images (PNG, JPG, WebP)"
+          hint="Analysis runs fully in your browser."
+          batchLimit={12}
+          formats={["PNG", "JPG", "WEBP"]}
         />
         {processing && (
           <div className="mt-4">
@@ -410,7 +412,7 @@ export default function RejectionPredictorPage() {
                       {img.width}×{img.height} · {img.orientation} · brightness {img.brightnessPct}%
                     </p>
                     <div className="mt-3 flex items-center gap-3">
-                      <Progress value={risk.score} tone={risk.score >= 75 ? "green" : risk.score >= 45 ? "blue" : "red"} className="max-w-xs" />
+                      <Progress value={risk.score} tone={risk.score >= 75 ? "success" : risk.score >= 45 ? "blue" : "red"} className="max-w-xs" />
                       <span className="text-lg font-bold text-foreground">{risk.score}<span className="text-sm font-normal text-muted">/100 safer</span></span>
                     </div>
                     <p className="mt-1 text-xs text-muted">{meta.text}</p>
@@ -568,7 +570,7 @@ export default function RejectionPredictorPage() {
                         {h.outcome === null ? (
                           <span className="text-muted">Not logged</span>
                         ) : h.outcome === "accepted" ? (
-                          <Badge tone="green">Accepted</Badge>
+                          <Badge tone="success">Accepted</Badge>
                         ) : (
                           <Badge tone="red">Rejected</Badge>
                         )}
