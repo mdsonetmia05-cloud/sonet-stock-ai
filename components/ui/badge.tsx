@@ -1,10 +1,10 @@
 import { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-type Tone = "green" | "red" | "neutral" | "amber" | "blue";
+type Tone = "success" | "red" | "neutral" | "amber" | "blue";
 
 const tones: Record<Tone, string> = {
-  green: "bg-primary/15 text-primaryBright border-primary/30",
+  success: "bg-primary/15 text-primaryBright border-primary/30",
   red: "bg-danger/15 text-danger border-danger/30",
   neutral: "bg-secondary text-muted border-border",
   amber: "bg-amber-500/15 text-amber-400 border-amber-500/30",

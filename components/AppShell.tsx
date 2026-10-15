@@ -5,12 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Search, CalendarDays, ShieldCheck, Sparkles, ScanEye, Tags,
   Layers, Eraser, ArrowUpFromLine, History, Settings, LifeBuoy, Menu, X,
-  Sun, Moon, ChevronRight, ChevronDown, LogOut, FlaskConical, Home,
+  Sun, Moon, ChevronRight, ChevronDown, LogOut, FlaskConical, Home, MessageSquareText,
 } from "lucide-react";
 import { useAuth, useTheme } from "./providers";
 import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { Dialog } from "./ui/dialog";
 
 interface NavItem {
   href: string;
@@ -61,16 +62,15 @@ const NAV: NavGroup[] = [
   },
 ];
 
-function Logo({ collapsed }: { collapsed?: boolean }) {
+function Wordmark({ compact }: { compact?: boolean }) {
   return (
-    <Link href="/" className="flex items-center gap-2.5 px-4 py-5" aria-label="SONET STOCK AI home">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-lg font-black text-white">
+    <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="SONET STOCK AI home">
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-base font-black text-white">
         S
       </span>
-      {!collapsed && (
-        <span className="leading-tight">
-          <span className="block text-sm font-bold tracking-wide text-foreground">SONET STOCK AI</span>
-          <span className="block text-[10px] text-muted">Create Smarter</span>
+      {!compact && (
+        <span className="text-sm font-extrabold tracking-tight text-foreground">
+          SONET <span className="text-primaryBright">STOCK AI</span>
         </span>
       )}
     </Link>
@@ -83,9 +83,9 @@ function SignInScreen() {
   const [email, setEmail] = useState("");
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md animate-fade-in rounded-2xl border border-border bg-card p-8 shadow-[var(--shadow)]">
+      <div className="w-full max-w-md animate-fade-in rounded-3xl border border-border bg-card p-8 shadow-[var(--shadow)]">
         <div className="mb-6 flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-xl font-black text-white">S</span>
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-xl font-black text-white">S</span>
           <div>
             <h1 className="text-lg font-bold text-foreground">SONET STOCK AI</h1>
             <p className="text-xs text-muted">Demo workspace — sign in locally</p>
@@ -117,6 +117,24 @@ function SignInScreen() {
   );
 }
 
+function UpgradeDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  return (
+    <Dialog open={open} onClose={onClose} title="Upgrade">
+      <p className="text-sm leading-relaxed text-muted">
+        This demo build runs fully on-device with heuristics and sample data — there is nothing
+        to upgrade yet. When a production build with server-side AI providers ships, provider
+        plans and pricing will be published here first.
+      </p>
+      <div className="mt-6 flex justify-end gap-2">
+        <Button variant="secondary" onClick={onClose}>Close</Button>
+        <Link href="/settings" onClick={onClose}>
+          <Button>Open Settings</Button>
+        </Link>
+      </div>
+    </Dialog>
+  );
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth();
   const { theme, toggle } = useTheme();
@@ -125,6 +143,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const crumbs = useMemo(() => {
     const segs = pathname.split("/").filter(Boolean);
@@ -156,7 +175,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                     aria-current={active ? "page" : undefined}
                     className={cn(
                       "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                      active ? "bg-primary/15 text-primaryBright" : "text-muted hover:bg-card hover:text-foreground",
+                      active
+                        ? "bg-primary/15 text-primaryBright"
+                        : "text-muted hover:bg-white/5 hover:text-foreground",
                       collapsed && "justify-center px-0",
                     )}
                   >
@@ -177,16 +198,18 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* desktop sidebar */}
       <aside
         className={cn(
-          "sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-secondary transition-all md:flex",
+          "sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-[#0a0a10] transition-all md:flex",
           collapsed ? "w-[76px]" : "w-64",
         )}
       >
-        <Logo collapsed={collapsed} />
+        <div className="px-4 py-5">
+          <Wordmark compact={collapsed} />
+        </div>
         {navContent()}
         <div className="border-t border-border p-3">
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-card hover:text-foreground"
+            className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? <ChevronRight size={16} /> : <><ChevronDown size={16} className="rotate-90" /> Collapse</>}
@@ -198,10 +221,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       {mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} aria-hidden />
-          <aside className="absolute left-0 top-0 flex h-full w-72 animate-fade-in flex-col border-r border-border bg-secondary">
-            <div className="flex items-center justify-between">
-              <Logo />
-              <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="mr-3 rounded-lg p-2 text-muted hover:bg-card">
+          <aside className="absolute left-0 top-0 flex h-full w-72 animate-fade-in flex-col border-r border-border bg-[#0a0a10]">
+            <div className="flex items-center justify-between px-4 py-5">
+              <Wordmark />
+              <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="rounded-lg p-2 text-muted hover:bg-white/5">
                 <X size={18} />
               </button>
             </div>
@@ -212,12 +235,18 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* topbar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-secondary/90 px-4 backdrop-blur">
-          <button onClick={() => setMobileOpen(true)} aria-label="Open menu" className="rounded-lg p-2 text-muted hover:bg-card md:hidden">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-[#0a0a0f] px-4">
+          <button onClick={() => setMobileOpen(true)} aria-label="Open menu" className="rounded-lg p-2 text-muted hover:bg-white/5 md:hidden">
             <Menu size={20} />
           </button>
+          <div className="md:hidden">
+            <Wordmark />
+          </div>
+          <div className="hidden md:block">
+            <Wordmark />
+          </div>
           <form
-            className="hidden max-w-sm flex-1 sm:block"
+            className="ml-4 hidden max-w-sm flex-1 lg:block"
             onSubmit={(e) => {
               e.preventDefault();
               router.push(`/history?q=${encodeURIComponent(search)}`);
@@ -232,13 +261,25 @@ export function AppShell({ children }: { children: ReactNode }) {
             />
           </form>
           <div className="ml-auto flex items-center gap-2">
-            <span className="hidden items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-400 lg:inline-flex" title="Demo mode">
+            <Link
+              href="/help"
+              className="hidden items-center gap-1.5 rounded-xl px-3 py-2 text-sm text-muted transition-colors hover:bg-white/5 hover:text-foreground sm:inline-flex"
+            >
+              <MessageSquareText size={16} /> Feedback
+            </Link>
+            <span className="hidden items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-400 lg:inline-flex" title="Demo mode: this build uses on-device heuristics and sample data.">
               <FlaskConical size={13} /> Demo
             </span>
-            <button onClick={toggle} aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} className="rounded-xl border border-border p-2.5 text-muted hover:bg-card hover:text-foreground">
+            <button
+              onClick={() => setUpgradeOpen(true)}
+              className="inline-flex h-9 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-white transition-all hover:brightness-110"
+            >
+              Upgrade
+            </button>
+            <button onClick={toggle} aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} className="rounded-xl border border-border p-2.5 text-muted hover:bg-white/5 hover:text-foreground">
               {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
             </button>
-            <Link href="/" aria-label="Homepage" className="rounded-xl border border-border p-2.5 text-muted hover:bg-card hover:text-foreground">
+            <Link href="/" aria-label="Homepage" className="rounded-xl border border-border p-2.5 text-muted hover:bg-white/5 hover:text-foreground">
               <Home size={17} />
             </Link>
             <div className="flex items-center gap-2 rounded-xl border border-border bg-card py-1.5 pl-1.5 pr-2">
@@ -276,6 +317,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           SONET STOCK AI — demo build. Adobe Stock, Shutterstock, Freepik, Vecteezy, Dreamstime, Depositphotos and 123RF are independent services; this tool is not affiliated with or endorsed by them.
         </footer>
       </div>
+
+      <UpgradeDialog open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
     </div>
   );
 }

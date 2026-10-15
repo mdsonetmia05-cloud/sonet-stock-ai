@@ -32,10 +32,10 @@ import { getEventsForYear } from "@/lib/events";
 import { formatDate, formatDateTime, truncate, nowIso, uid } from "@/lib/utils";
 import { JOB_ROUTE, JOB_TYPE_LABEL } from "@/lib/jobs";
 
-function statusTone(s: JobStatus): "green" | "red" | "amber" | "neutral" | "blue" {
+function statusTone(s: JobStatus): "success" | "red" | "amber" | "neutral" | "blue" {
   switch (s) {
     case "completed":
-      return "green";
+      return "success";
     case "failed":
     case "cancelled":
       return "red";

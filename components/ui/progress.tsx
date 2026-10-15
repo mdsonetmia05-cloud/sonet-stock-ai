@@ -3,11 +3,11 @@ import { cn } from "@/lib/utils";
 export function Progress({
   value,
   className,
-  tone = "green",
+  tone = "success",
 }: {
   value: number; // 0-100
   className?: string;
-  tone?: "green" | "red" | "blue";
+  tone?: "success" | "red" | "blue";
 }) {
   const v = Math.max(0, Math.min(100, value));
   return (
@@ -21,7 +21,7 @@ export function Progress({
       <div
         className={cn(
           "h-full rounded-full transition-all duration-300",
-          tone === "green" && "bg-primaryBright",
+          tone === "success" && "bg-primaryBright",
           tone === "red" && "bg-danger",
           tone === "blue" && "bg-blue-500",
         )}

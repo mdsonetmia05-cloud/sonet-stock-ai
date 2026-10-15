@@ -18,10 +18,10 @@ import { downloadCsv } from "@/lib/csv";
 import { formatDate, formatDateTime, formatBytes, truncate, nowIso, uid } from "@/lib/utils";
 import { JOB_ROUTE, JOB_TYPE_LABEL } from "@/lib/jobs";
 
-function statusTone(s: JobStatus): "green" | "red" | "amber" | "neutral" | "blue" {
+function statusTone(s: JobStatus): "success" | "red" | "amber" | "neutral" | "blue" {
   switch (s) {
     case "completed":
-      return "green";
+      return "success";
     case "failed":
     case "cancelled":
       return "red";
@@ -51,8 +51,8 @@ const STATUS_OPTIONS = [
   { value: "cancelled", label: "Cancelled" },
 ];
 
-function qcRiskTone(r: "low" | "review" | "high"): "green" | "amber" | "red" {
-  return r === "low" ? "green" : r === "review" ? "amber" : "red";
+function qcRiskTone(r: "low" | "review" | "high"): "success" | "amber" | "red" {
+  return r === "low" ? "success" : r === "review" ? "amber" : "red";
 }
 
 function HistoryBody() {

@@ -216,7 +216,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={prefs.singleWordKeywords}
                 onChange={(e) => setPrefs({ ...prefs, singleWordKeywords: e.target.checked })}
-                className="h-4 w-4 accent-[#159447]"
+                className="h-4 w-4 accent-[#2563EB]"
                 aria-label="Use single-word keywords"
               />
               <span className="text-sm text-foreground">
@@ -254,7 +254,7 @@ export default function SettingsPage() {
               <div className="text-sm font-semibold text-foreground">Demo Provider (on-device heuristics)</div>
               <div className="text-xs text-muted">Active — text assembled locally from templates and image measurements.</div>
             </div>
-            <Badge tone="green">active</Badge>
+            <Badge tone="success">active</Badge>
           </div>
           <div className="mt-3 flex flex-col gap-2">
             {providerLoading ? (
@@ -263,7 +263,7 @@ export default function SettingsPage() {
               serverList.map((p) => (
                 <div key={p.id} className="flex items-center justify-between rounded-xl bg-secondary/60 px-4 py-2.5">
                   <span className="text-sm capitalize text-foreground">{p.id} (server)</span>
-                  <Badge tone={p.hasKey ? "green" : "neutral"}>{p.hasKey ? "configured" : "not configured"}</Badge>
+                  <Badge tone={p.hasKey ? "success" : "neutral"}>{p.hasKey ? "configured" : "not configured"}</Badge>
                 </div>
               ))
             )}
