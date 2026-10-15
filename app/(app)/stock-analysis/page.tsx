@@ -224,7 +224,7 @@ const ASSET_ICONS: Record<string, typeof Camera> = {
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
   "Technology & AI": "from-sky-600 via-indigo-700 to-indigo-950",
-  "Nature": "from-emerald-600 via-green-700 to-green-950",
+  "Nature": "from-blue-600 via-blue-700 to-blue-950",
   "Business": "from-slate-600 via-slate-700 to-slate-950",
   "Animals": "from-amber-600 via-orange-700 to-orange-950",
   "Food": "from-red-600 via-rose-700 to-rose-950",

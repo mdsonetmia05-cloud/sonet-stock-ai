@@ -153,7 +153,7 @@ export default function MetadataGeneratorPage() {
   );
   const [processing, setProcessing] = useState(false);
   const [showSettings, setShowSettings] = useState(true);
-  const [notice, setNotice] = useState<{ tone: "green" | "red" | "amber"; text: string } | null>(null);
+  const [notice, setNotice] = useState<{ tone: "success" | "red" | "amber"; text: string } | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [kwInputs, setKwInputs] = useState<Record<string, string>>({});
 
@@ -184,7 +184,7 @@ export default function MetadataGeneratorPage() {
     };
   }, []);
 
-  const flashNotice = (tone: "green" | "red" | "amber", text: string) => {
+  const flashNotice = (tone: "success" | "red" | "amber", text: string) => {
     setNotice({ tone, text });
     window.setTimeout(() => setNotice(null), 6000);
   };
@@ -378,7 +378,7 @@ export default function MetadataGeneratorPage() {
 
       processingRef.current = false;
       setProcessing(false);
-      if (failed === 0) flashNotice("green", `Done — ${done} of ${total} file${total === 1 ? "" : "s"} generated.`);
+      if (failed === 0) flashNotice("success", `Done — ${done} of ${total} file${total === 1 ? "" : "s"} generated.`);
       else if (done === 0) flashNotice("red", `All ${total} files failed. Check the error cards and retry.`);
       else flashNotice("amber", `${done} of ${total} completed, ${failed} failed.`);
     },
@@ -499,7 +499,7 @@ export default function MetadataGeneratorPage() {
     const filename = `sonet-stock-ai-metadata-${new Date().toISOString().slice(0, 10)}.csv`;
     const size = downloadCsv(filename, CSV_COLUMNS, ready.map(rowFor));
     logExport(filename, `${ready.length} metadata records`, size);
-    flashNotice("green", `Exported ${ready.length} record${ready.length === 1 ? "" : "s"} to ${filename}.`);
+    flashNotice("success", `Exported ${ready.length} record${ready.length === 1 ? "" : "s"} to ${filename}.`);
   };
 
   const exportOneCsv = (f: WorkFile) => {
@@ -507,7 +507,7 @@ export default function MetadataGeneratorPage() {
     const filename = `${base}-metadata.csv`;
     const size = downloadCsv(filename, CSV_COLUMNS, [rowFor(f)]);
     logExport(filename, `1 metadata record (${f.name})`, size);
-    flashNotice("green", `Exported metadata for ${f.name}.`);
+    flashNotice("success", `Exported metadata for ${f.name}.`);
   };
 
   const copyAll = () => {
@@ -539,7 +539,7 @@ export default function MetadataGeneratorPage() {
       prohibitedWords: settings.prohibitedWords,
     };
     db.preferences.save(next);
-    flashNotice("green", "Settings saved to preferences.");
+    flashNotice("success", "Settings saved to preferences.");
   };
 
   const resetSettings = () => {
@@ -556,7 +556,7 @@ export default function MetadataGeneratorPage() {
         prohibitedWords: "",
       }),
     );
-    flashNotice("green", "Settings reset to defaults.");
+    flashNotice("success", "Settings reset to defaults.");
   };
 
   const setNum = (key: "minTitleWords" | "maxTitleWords" | "minKeywords" | "maxKeywords" | "descriptionWords") =>
@@ -583,7 +583,7 @@ export default function MetadataGeneratorPage() {
       }
       if (!gen) return;
       updateFields(item.id, fieldsFromGenerated(gen));
-      flashNotice("green", `Regenerated suggested metadata for ${item.name}.`);
+      flashNotice("success", `Regenerated suggested metadata for ${item.name}.`);
     },
     [updateFields],
   );
@@ -620,7 +620,7 @@ export default function MetadataGeneratorPage() {
   const kindBadge = (f: WorkFile) => {
     if (f.status === "error") return <Badge tone="red">Error</Badge>;
     if (f.status === "analyzing" || f.status === "queued") return <Badge tone="blue">Analyzing…</Badge>;
-    if (f.kind === "raster") return <Badge tone="green">Vision-analyzed</Badge>;
+    if (f.kind === "raster") return <Badge tone="success">Vision-analyzed</Badge>;
     if (f.kind === "svg") return <Badge tone="amber">Metadata-only</Badge>;
     return <Badge tone="neutral">Manual flow</Badge>;
   };
@@ -669,7 +669,7 @@ export default function MetadataGeneratorPage() {
           role="status"
           className={cn(
             "mb-4 rounded-xl border px-4 py-3 text-sm",
-            notice.tone === "green" && "border-primary/30 bg-primary/10 text-primaryBright",
+            notice.tone === "success" && "border-primary/30 bg-primary/10 text-primaryBright",
             notice.tone === "red" && "border-danger/30 bg-danger/10 text-danger",
             notice.tone === "amber" && "border-amber-500/30 bg-amber-500/10 text-amber-400",
           )}
@@ -684,8 +684,9 @@ export default function MetadataGeneratorPage() {
           accept={ACCEPT}
           multiple
           onFiles={handleFiles}
-          label="Drag and drop assets here"
-          hint="JPG, JPEG, PNG, WebP · SVG · EPS, AI · MP4, MOV, WebM — raster images are vision-analyzed on-device"
+          label="Drag and drop files to extract metadata"
+          hint="Raster images are vision-analyzed on-device."
+          formats={["JPG", "PNG", "WEBP", "SVG", "EPS", "AI"]}
         />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-muted" aria-live="polite">
@@ -781,7 +782,7 @@ export default function MetadataGeneratorPage() {
                       type="checkbox"
                       checked={settings[key]}
                       onChange={(e) => setSettings((s) => ({ ...s, [key]: e.target.checked }))}
-                      className="h-4 w-4 accent-[#22c55e]"
+                      className="h-4 w-4 accent-[#2563EB]"
                     />
                     {label}
                   </label>
