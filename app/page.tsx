@@ -180,7 +180,7 @@ export default function HomePage() {
       <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black">
         <Image
           src="/hero-cinematic.jpg"
-          alt="Photographer silhouetted with a tripod against a glowing foggy city skyline at night"
+          alt="Samurai silhouette on a grassy hilltop overlooking a foggy city skyline"
           fill
           priority
           sizes="100vw"
@@ -195,7 +195,7 @@ export default function HomePage() {
         <header className="relative z-10">
           <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6">
             <Link href="/" className="flex items-center gap-2.5">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-black/40">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-zinc-900 text-white shadow-lg shadow-black/40">
                 <Sparkles size={19} />
               </span>
               <span className="leading-tight">
@@ -221,7 +221,7 @@ export default function HomePage() {
             <div className="hidden lg:block">
               <Link
                 href="/dashboard"
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-white shadow-lg shadow-black/30 transition-all hover:brightness-110"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-white/25 bg-black px-6 text-sm font-bold text-white shadow-lg shadow-black/30 transition-all hover:bg-zinc-900"
               >
                 Get Started <ArrowRight size={16} />
               </Link>
@@ -250,7 +250,7 @@ export default function HomePage() {
                 <Link
                   href="/dashboard"
                   onClick={() => setMenuOpen(false)}
-                  className="mt-1 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white"
+                  className="mt-1 inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/25 bg-black px-4 text-sm font-bold text-white"
                 >
                   Get Started <ArrowRight size={16} />
                 </Link>
@@ -268,7 +268,7 @@ export default function HomePage() {
               CREATE BIG
             </span>
             <span
-              className={`${caveat.className} absolute -bottom-[0.42em] right-[0.02em] -rotate-3 text-[clamp(2.75rem,8vw,6rem)] font-bold leading-none text-primaryBright drop-shadow-[0_4px_20px_rgba(0,0,0,0.85)]`}
+              className={`${caveat.className} absolute -bottom-[0.42em] right-[0.02em] -rotate-3 text-[clamp(2.75rem,8vw,6rem)] font-bold leading-none text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.85)]`}
             >
               ger!
             </span>
@@ -283,7 +283,7 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             {HERO_PILLS.map((p) => {
               const cls = p.primary
-                ? "inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-white shadow-lg shadow-black/30 transition-all hover:brightness-110"
+                ? "inline-flex h-12 items-center gap-2 rounded-full border border-white/25 bg-black px-6 text-sm font-bold text-white shadow-lg shadow-black/30 transition-all hover:bg-zinc-900"
                 : "inline-flex h-12 items-center gap-2 rounded-full border border-white/25 bg-white/[0.06] px-5 text-sm font-medium text-white backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/[0.12]";
               const inner = (
                 <>
