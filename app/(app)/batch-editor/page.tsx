@@ -14,8 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileDropzone } from "@/components/ui/file-dropzone";
 import { ConfirmDialog } from "@/components/ui/dialog";
-import { useAuth } from "@/components/providers";
-import { dbFor, bumpUsage, Job } from "@/lib/db";
+import { localDb, bumpUsage, Job } from "@/lib/db";
 import { uid, nowIso, formatBytes, truncate } from "@/lib/utils";
 import { downloadCsv, downloadTextFile, downloadBlob } from "@/lib/csv";
 import { downloadZip } from "@/lib/zip";
@@ -79,7 +78,6 @@ function buildPrompt(
 }
 
 export default function BatchEditorPage() {
-  const { user } = useAuth();
   const [items, setItems] = useState<BatchItem[]>([]);
   const [mode, setMode] = useState(PROMPT_MODES[0]);
   const [shared, setShared] = useState("");
@@ -139,8 +137,8 @@ export default function BatchEditorPage() {
 
   const runQueue = useCallback(
     async (onlyIds?: string[]) => {
-      if (!user || running) return;
-      const db = dbFor(user.id);
+      if (running) return;
+      const db = localDb();
       setRunning(true);
       setPaused(false);
       setSummary(null);
@@ -196,7 +194,7 @@ export default function BatchEditorPage() {
       setRunning(false);
       setPaused(false);
     },
-    [user, running, processOne, patchItem],
+    [running, processOne, patchItem],
   );
 
   const pause = () => { controlRef.current.paused = true; setPaused(true); };
@@ -228,8 +226,7 @@ export default function BatchEditorPage() {
   const completedSelected = items.filter((i) => i.selected && i.status === "done");
 
   const exportManifestCsv = () => {
-    if (!user) return;
-    const db = dbFor(user.id);
+    const db = localDb();
     const rows = completedSelected.map((i) => ({
       Filename: `${i.displayName}.txt`,
       Original: i.file.name,
@@ -243,8 +240,7 @@ export default function BatchEditorPage() {
   };
 
   const downloadZipAll = async () => {
-    if (!user) return;
-    const db = dbFor(user.id);
+    const db = localDb();
     const entries = completedSelected.map((i) => ({
       name: `${i.displayName}.txt`,
       blob: new Blob([`TITLE: ${i.title ?? ""}\n\nKEYWORDS: ${(i.keywords ?? []).join(", ")}\n\nPROMPT:\n${i.prompt ?? ""}\n`], { type: "text/plain;charset=utf-8" }),
@@ -295,7 +291,7 @@ export default function BatchEditorPage() {
           accept={ACCEPT}
           onFiles={addFiles}
           label="Drag and drop images (PNG, JPG, WebP)"
-          hint="Prompts are generated with on-device heuristics (demo mode)."
+          hint="Prompts are generated on-device from your batch settings."
           formats={["PNG", "JPG", "WEBP"]}
         />
       ) : (
@@ -383,7 +379,7 @@ export default function BatchEditorPage() {
                         aria-label={`Output name for ${it.file.name}`}
                         className="!h-8 !py-1 text-sm font-medium"
                       />
-                      <Badge tone={it.status === "done" ? "success" : it.status === "failed" ? "red" : it.status === "processing" ? "blue" : "neutral"}>
+                      <Badge tone={it.status === "done" ? "success" : it.status === "failed" ? "red" : it.status === "processing" ? "info" : "neutral"}>
                         {it.status}
                       </Badge>
                       <span className="text-[11px] text-muted">{formatBytes(it.file.size)} · {truncate(it.file.name, 32)}</span>

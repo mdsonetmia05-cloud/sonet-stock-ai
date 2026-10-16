@@ -14,8 +14,7 @@ import { Input, Label } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Tabs } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useAuth } from "@/components/providers";
-import { dbFor, bumpUsage } from "@/lib/db";
+import { localDb, bumpUsage } from "@/lib/db";
 import { downloadCsv } from "@/lib/csv";
 import {
   getEventsForYear, filterEvents, EVENT_CATEGORIES, COUNTRIES,
@@ -40,8 +39,8 @@ const PRIORITY_TONE: Record<StockEvent["priority"], "red" | "amber" | "neutral">
   high: "red", medium: "amber", low: "neutral",
 };
 
-const DATE_TYPE_TONE: Record<EventDateType, "success" | "blue" | "amber"> = {
-  verified: "success", computed: "blue", approximate: "amber",
+const DATE_TYPE_TONE: Record<EventDateType, "success" | "info" | "amber"> = {
+  verified: "success", computed: "info", approximate: "amber",
 };
 
 const DRAFT_KEY = "ssa:v1:draft:prompt-idea";
@@ -82,7 +81,6 @@ function formatEventDate(iso: string): string {
 }
 
 export default function EventCalendarPage() {
-  const { user, signIn } = useAuth();
   const router = useRouter();
   const { copied, copy } = useClipboard();
 
@@ -96,7 +94,7 @@ export default function EventCalendarPage() {
   const [expandedChecklist, setExpandedChecklist] = useState<Set<string>>(new Set());
   const [checklists, setChecklists] = useState<Record<string, string[]>>({});
   const [favIds, setFavIds] = useState<Set<string>>(() =>
-    user ? new Set(dbFor(user.id).favorites.all().filter((f) => f.kind === "event").map((f) => f.refId)) : new Set(),
+    new Set(localDb().favorites.all().filter((f) => f.kind === "event").map((f) => f.refId)),
   );
 
   const allEvents = useMemo(() => getEventsForYear(Number(year)), [year]);
@@ -109,20 +107,7 @@ export default function EventCalendarPage() {
     return base.filter((e) => Number(e.date.slice(5, 7)) === month + 1);
   }, [allEvents, country, category, query, favoritesOnly, favIds, month]);
 
-  if (!user) {
-    return (
-      <div className="mx-auto max-w-xl pt-16">
-        <EmptyState
-          icon={<CalendarDays size={40} />}
-          title="Sign in to use the Event Calendar"
-          description="Your event favorites and production checklists are stored per user."
-          action={<Button onClick={() => signIn("Demo Creator", "demo@sonetstock.ai")}>Continue as demo creator</Button>}
-        />
-      </div>
-    );
-  }
-
-  const db = dbFor(user.id);
+  const db = localDb();
 
   const toggleFavorite = (event: StockEvent) => {
     if (favIds.has(event.id)) {

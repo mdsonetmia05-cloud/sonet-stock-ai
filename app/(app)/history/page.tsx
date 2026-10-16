@@ -12,13 +12,12 @@ import { Select } from "@/components/ui/select";
 import { Tabs } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ConfirmDialog } from "@/components/ui/dialog";
-import { useAuth } from "@/components/providers";
-import { dbFor, bumpUsage, type JobStatus, type JobType } from "@/lib/db";
+import { localDb, bumpUsage, type JobStatus, type JobType } from "@/lib/db";
 import { downloadCsv } from "@/lib/csv";
 import { formatDate, formatDateTime, formatBytes, truncate, nowIso, uid } from "@/lib/utils";
 import { JOB_ROUTE, JOB_TYPE_LABEL } from "@/lib/jobs";
 
-function statusTone(s: JobStatus): "success" | "red" | "amber" | "neutral" | "blue" {
+function statusTone(s: JobStatus): "success" | "red" | "amber" | "neutral" | "info" {
   switch (s) {
     case "completed":
       return "success";
@@ -28,7 +27,7 @@ function statusTone(s: JobStatus): "success" | "red" | "amber" | "neutral" | "bl
     case "processing":
       return "amber";
     case "queued":
-      return "blue";
+      return "info";
     default:
       return "neutral";
   }
@@ -56,7 +55,6 @@ function qcRiskTone(r: "low" | "review" | "high"): "success" | "amber" | "red" {
 }
 
 function HistoryBody() {
-  const { user } = useAuth();
   const searchParams = useSearchParams();
   const initialQ = searchParams.get("q") ?? "";
   const [tick, setTick] = useState(0);
@@ -70,17 +68,16 @@ function HistoryBody() {
   const [deleteQcId, setDeleteQcId] = useState<string | null>(null);
 
   const data = useMemo(() => {
-    if (!user) return null;
-    const db = dbFor(user.id);
+    const db = localDb();
     return {
       db,
       jobs: db.jobs.all(),
       exports: db.exports.all(),
       qc: db.qcReports.all(),
     };
-  }, [user, tick]);
+  }, [tick]);
 
-  if (!user || !data) return null;
+  if (!data) return null;
 
   const filteredJobs = data.jobs
     .filter((j) =>

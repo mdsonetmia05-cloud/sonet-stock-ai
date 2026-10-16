@@ -26,7 +26,7 @@ const TOOL_DOCS = [
     icon: FileText,
     title: "AI Metadata Generator",
     route: "/metadata-generator",
-    body: "Upload one or more images to get titles, descriptions and keywords built from on-device image analysis (colors, lighting, orientation, edge density). Choose a marketplace profile to match word and keyword limits. Export as CSV or copy — metadata is not embedded into files in this build.",
+    body: "Upload one or more images to get titles, descriptions and keywords built from on-device image analysis (colors, lighting, orientation, edge density). Choose a marketplace profile to match word and keyword limits. Export as CSV or copy — metadata is not embedded into files.",
   },
   {
     icon: ImagePlus,
@@ -38,7 +38,7 @@ const TOOL_DOCS = [
     icon: Compass,
     title: "Stock Market Research",
     route: "/stock-analysis",
-    body: "Organize research projects with your own notes on topic, platform and asset type. Any sample context is clearly labeled SAMPLE — this build never fabricates download counts, rankings, sales or contributor data.",
+    body: "Upload a CSV of your own portfolio and get real breakdowns by platform, category, asset type and keyword. Every number comes from your file — nothing is estimated or sampled.",
   },
   {
     icon: Wand2,
@@ -81,11 +81,11 @@ const TOOL_DOCS = [
 const HELP_FAQS = [
   {
     q: "Do I need an account or API key?",
-    a: "No. The demo workspace creates a local profile on your device — no signup, no key. Server-side AI providers are not configured in this build; Settings shows their status honestly.",
+    a: "No. Everything runs in your browser — no signup, no key. Optional server-side AI providers (Gemini, OpenAI, Anthropic) can be enabled with an API key; Settings shows their status.",
   },
   {
     q: "Is my work uploaded anywhere?",
-    a: "No. Images, prompts and metadata are processed and stored in your browser's localStorage. Nothing leaves your device in this build. Use Settings to wipe it all.",
+    a: "No. Images, prompts and metadata are processed and stored in your browser's localStorage. Nothing leaves your device. Use Settings to wipe it all.",
   },
   {
     q: "Can I edit metadata after generating it?",
@@ -171,17 +171,17 @@ export default function HelpPage() {
         ))}
       </div>
 
-      {/* demo mode explained */}
+      {/* how the tools work */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Demo mode, explained</CardTitle>
+          <CardTitle>How the tools work</CardTitle>
           <MonitorSmartphone size={16} className="text-primaryBright" />
         </CardHeader>
         <ul className="flex flex-col gap-2.5 text-sm leading-relaxed text-muted">
-          <li>• Every tool runs on-device in your browser. No real AI model is called; text output is assembled from templates and measured image data.</li>
-          <li>• The <strong className="text-foreground">Demo Provider (on-device heuristics)</strong> is the only active provider. Server providers (Gemini, OpenAI, Anthropic) are listed as not configured in Settings.</li>
-          <li>• Any sample or illustrative data is badged <strong className="text-foreground">SAMPLE</strong>. Unavailable marketplace data renders as <strong className="text-foreground">n/a — not exposed</strong>, never as a fabricated number.</li>
-          <li>• Upscaling is labeled basic browser upscaling; background removal is flood-fill alpha — neither is AI.</li>
+          <li>• Every tool runs on-device in your browser. Text output is assembled from templates and measured image data — no API key or signup needed.</li>
+          <li>• Optional server-side AI providers (Gemini, OpenAI, Anthropic) can be enabled with an API key; their status is shown in Settings.</li>
+          <li>• Numbers you see always come from your own files and activity — the app never invents download counts, rankings, sales or revenue.</li>
+          <li>• Upscaling uses browser canvas resampling and background removal uses flood-fill alpha — both are clearly labeled in their tools.</li>
         </ul>
       </Card>
 

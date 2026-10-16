@@ -25,14 +25,13 @@ import { Input, Label } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ConfirmDialog } from "@/components/ui/dialog";
-import { useAuth } from "@/components/providers";
-import { dbFor, bumpUsage, type Job, type JobStatus, type JobType } from "@/lib/db";
+import { localDb, bumpUsage, type Job, type JobStatus, type JobType } from "@/lib/db";
 import { downloadCsv } from "@/lib/csv";
 import { getEventsForYear } from "@/lib/events";
 import { formatDate, formatDateTime, truncate, nowIso, uid } from "@/lib/utils";
 import { JOB_ROUTE, JOB_TYPE_LABEL } from "@/lib/jobs";
 
-function statusTone(s: JobStatus): "success" | "red" | "amber" | "neutral" | "blue" {
+function statusTone(s: JobStatus): "success" | "red" | "amber" | "neutral" | "info" {
   switch (s) {
     case "completed":
       return "success";
@@ -42,7 +41,7 @@ function statusTone(s: JobStatus): "success" | "red" | "amber" | "neutral" | "bl
     case "processing":
       return "amber";
     case "queued":
-      return "blue";
+      return "info";
     default:
       return "neutral";
   }
@@ -57,10 +56,7 @@ const SUGGESTED_TOPICS = [
   "Seasonal festival decorations and lights",
 ];
 
-const SAMPLE_BARS = [34, 52, 44, 66, 58, 76, 62, 84, 70, 90, 78, 56];
-
 export default function DashboardPage() {
-  const { user } = useAuth();
   const [tick, setTick] = useState(0);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -68,8 +64,7 @@ export default function DashboardPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const data = useMemo(() => {
-    if (!user) return null;
-    const db = dbFor(user.id);
+    const db = localDb();
     const jobs = db.jobs.all();
     const exports_ = db.exports.all();
     const favPrompts = db.prompts.all().filter((p) => p.favorite);
@@ -93,9 +88,9 @@ export default function DashboardPage() {
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 4);
     return { db, jobs, exports_, favPrompts, favItems, usage, stats, statusCounts, upcoming };
-  }, [user, tick]);
+  }, [tick]);
 
-  if (!user || !data) return null;
+  if (!data) return null;
 
   const allZero = Object.values(data.stats).every((v) => v === 0);
 
@@ -188,26 +183,6 @@ export default function DashboardPage() {
           className="mb-6"
         />
       )}
-
-      {/* sample analytics illustration */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>What analytics will look like</CardTitle>
-          <Badge tone="neutral">SAMPLE</Badge>
-        </CardHeader>
-        <p className="mb-3 text-xs text-muted">
-          Illustration only — your real charts will be built from your on-device usage once you start working.
-        </p>
-        <div className="flex h-24 items-end gap-1.5" aria-hidden>
-          {SAMPLE_BARS.map((h, i) => (
-            <div key={i} className="flex-1 rounded-t bg-primary/50" style={{ height: `${h}%` }} />
-          ))}
-        </div>
-        <div className="mt-1 flex justify-between text-[10px] text-muted">
-          <span>12 weeks of activity (illustrative)</span>
-          <span>No marketplace metrics</span>
-        </div>
-      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* recent jobs */}
@@ -416,7 +391,7 @@ export default function DashboardPage() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Suggested topics to explore</CardTitle>
-            <Badge tone="blue">Suggestions</Badge>
+            <Badge tone="info">Suggestions</Badge>
           </CardHeader>
           <p className="mb-3 text-xs text-muted">
             Generic creative ideas, not market data — verify demand on each marketplace yourself before investing production time.
