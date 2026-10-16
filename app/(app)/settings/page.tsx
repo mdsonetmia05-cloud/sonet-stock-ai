@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Palette, SlidersHorizontal, Cpu, Database, Trash2, Save } from "lucide-react";
+import { Palette, SlidersHorizontal, Cpu, Database, Trash2, Save, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,8 +10,11 @@ import { Select } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { useTheme } from "@/components/providers";
 import { localDb, DEFAULT_PREFERENCES, type UserPreferences } from "@/lib/db";
-import { fetchServerProviderStatus, type ServerProviderStatus } from "@/lib/providers";
-import { formatBytes } from "@/lib/utils";
+import { listProviders, getActiveProvider, setActiveProvider, clearProvider } from "@/lib/ai-providers";
+import { formatBytes, cn } from "@/lib/utils";
+
+type Provider = ReturnType<typeof listProviders>[number];
+type ActiveProvider = { id: string; apiKey: string; model: string } | null;
 
 const MARKETPLACES = [
   { value: "adobe-stock", label: "Adobe Stock" },
@@ -24,24 +27,168 @@ const MARKETPLACES = [
   { value: "generic", label: "Generic CSV" },
 ];
 
-const KNOWN_SERVER_PROVIDERS = ["gemini", "openai", "anthropic"];
+function ProviderCard({
+  provider,
+  active,
+  onActiveChange,
+}: {
+  provider: Provider;
+  active: ActiveProvider;
+  onActiveChange: () => void;
+}) {
+  const [key, setKey] = useState("");
+  const [model, setModel] = useState(provider.defaultModel);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [confirmOverwrite, setConfirmOverwrite] = useState(false);
+
+  const isActive = active?.id === provider.id;
+  const anotherActive = active !== null && !isActive;
+
+  useEffect(() => {
+    if (isActive && active?.model && provider.models.includes(active.model)) {
+      setModel(active.model);
+    }
+  }, [isActive, active?.model, provider.models]);
+
+  const doSave = () => {
+    setActiveProvider(provider.id, key.trim(), model);
+    setConfirmOverwrite(false);
+    setTestResult(null);
+    onActiveChange();
+  };
+
+  const handleSave = () => {
+    if (!key.trim()) {
+      setTestResult({ ok: false, message: "Enter an API key first." });
+      return;
+    }
+    if (anotherActive) {
+      setConfirmOverwrite(true);
+      return;
+    }
+    doSave();
+  };
+
+  const handleTest = async () => {
+    if (!key.trim()) {
+      setTestResult({ ok: false, message: "Enter an API key first." });
+      return;
+    }
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: provider.id, apiKey: key.trim(), model, prompt: "Reply with: OK" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        const text = typeof data?.text === "string" ? data.text : JSON.stringify(data);
+        setTestResult({
+          ok: true,
+          message: /OK/i.test(text) ? `Connected — ${model} replied OK` : `Connected — ${model} responded`,
+        });
+      } else {
+        const err = data?.error || data?.detail || `Request failed (HTTP ${res.status})`;
+        setTestResult({ ok: false, message: String(err) });
+      }
+    } catch (e) {
+      setTestResult({ ok: false, message: e instanceof Error ? e.message : "Network error" });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const handleRemove = () => {
+    clearProvider();
+    setKey("");
+    setTestResult(null);
+    onActiveChange();
+  };
+
+  return (
+    <div className={cn("rounded-xl border px-4 py-3", isActive ? "border-primary/40 bg-primary/5" : "border-border bg-secondary/40")}>
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <div className="text-sm font-semibold text-foreground">{provider.name}</div>
+          <div className="text-xs text-muted">{provider.freeNote}</div>
+        </div>
+        {isActive && <Badge tone="success">Active</Badge>}
+      </div>
+      <a
+        href={provider.keyUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primaryBright hover:underline"
+      >
+        Get free key <ExternalLink size={12} />
+      </a>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div>
+          <Label htmlFor={`model-${provider.id}`}>Model</Label>
+          <Select
+            id={`model-${provider.id}`}
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            options={provider.models}
+          />
+        </div>
+        <div>
+          <Label htmlFor={`key-${provider.id}`}>API key</Label>
+          <Input
+            id={`key-${provider.id}`}
+            type="password"
+            autoComplete="off"
+            placeholder={isActive ? "Saved — enter a new key to replace" : "Paste your free API key"}
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+          />
+        </div>
+      </div>
+      {testResult && (
+        <p className={cn("mt-2 text-xs", testResult.ok ? "text-primaryBright" : "text-danger")}>
+          {testResult.message}
+        </p>
+      )}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button size="sm" onClick={handleSave}>
+          <Save size={14} /> Save
+        </Button>
+        <Button size="sm" variant="secondary" loading={testing} onClick={handleTest}>
+          Test
+        </Button>
+        {isActive && (
+          <Button size="sm" variant="ghost" className="text-danger hover:text-danger" onClick={handleRemove}>
+            Remove
+          </Button>
+        )}
+      </div>
+      <ConfirmDialog
+        open={confirmOverwrite}
+        onClose={() => setConfirmOverwrite(false)}
+        onConfirm={doSave}
+        title="Replace active provider?"
+        message={`This will remove the saved key for the currently active provider and activate ${provider.name} instead.`}
+        confirmLabel="Replace"
+      />
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const [tick, setTick] = useState(0);
   const [prefs, setPrefs] = useState<UserPreferences>({ ...DEFAULT_PREFERENCES });
   const [prefsSaved, setPrefsSaved] = useState(false);
-  const [providerStatus, setProviderStatus] = useState<ServerProviderStatus | null>(null);
-  const [providerLoading, setProviderLoading] = useState(true);
   const [confirmWipe, setConfirmWipe] = useState(false);
+  const [active, setActive] = useState<ActiveProvider>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchServerProviderStatus()
-      .then((s) => { if (!cancelled) setProviderStatus(s); })
-      .finally(() => { if (!cancelled) setProviderLoading(false); });
-    return () => { cancelled = true; };
-  }, []);
+  const providers = useMemo(() => listProviders(), []);
+
+  const refreshActive = () => setActive(getActiveProvider());
+  useEffect(() => { refreshActive(); }, []);
 
   const data = useMemo(() => {
     const db = localDb();
@@ -88,10 +235,6 @@ export default function SettingsPage() {
     setConfirmWipe(false);
     setTick((t) => t + 1);
   };
-
-  const serverList = providerStatus?.providers?.length
-    ? providerStatus.providers
-    : KNOWN_SERVER_PROVIDERS.map((id) => ({ id, hasKey: false }));
 
   return (
     <div>
@@ -208,20 +351,14 @@ export default function SettingsPage() {
             </div>
             <Badge tone="success">active</Badge>
           </div>
-          <div className="mt-3 flex flex-col gap-2">
-            {providerLoading ? (
-              <p className="text-sm text-muted">Checking server providers…</p>
-            ) : (
-              serverList.map((p) => (
-                <div key={p.id} className="flex items-center justify-between rounded-xl bg-secondary/60 px-4 py-2.5">
-                  <span className="text-sm capitalize text-foreground">{p.id} <span className="text-xs text-muted">(server)</span></span>
-                  <Badge tone={p.hasKey ? "success" : "neutral"}>{p.hasKey ? "configured" : "not configured"}</Badge>
-                </div>
-              ))
-            )}
+          <div className="mt-4 grid gap-3">
+            {providers.map((p) => (
+              <ProviderCard key={p.id} provider={p} active={active} onActiveChange={refreshActive} />
+            ))}
           </div>
           <p className="mt-3 text-xs text-muted">
-            Server providers are enabled by setting the matching API key as a server environment variable (see README). Keys are never stored in the browser.
+            Keys are stored only in this browser (localStorage). They are sent to this app&apos;s
+            server only to forward your request to the provider — never stored or logged.
           </p>
         </Card>
 
