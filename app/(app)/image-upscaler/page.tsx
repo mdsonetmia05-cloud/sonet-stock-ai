@@ -326,7 +326,7 @@ export default function ImageUpscalerPage() {
                           value={s}
                           checked={scale === s}
                           onChange={() => setScale(s)}
-                          style={{ accentColor: "var(--green-bright)" }}
+                          style={{ accentColor: "var(--gold-bright)" }}
                         />
                         {s}x
                       </label>
@@ -344,7 +344,7 @@ export default function ImageUpscalerPage() {
                     value={denoise}
                     onChange={(e) => setDenoise(Number(e.target.value))}
                     className="w-full"
-                    style={{ accentColor: "var(--green-bright)" }}
+                    style={{ accentColor: "var(--gold-bright)" }}
                     aria-describedby="iu-denoise-hint"
                   />
                   <p id="iu-denoise-hint" className="mt-1 text-[11px] text-muted">
@@ -362,7 +362,7 @@ export default function ImageUpscalerPage() {
                     value={sharpen}
                     onChange={(e) => setSharpen(Number(e.target.value))}
                     className="w-full"
-                    style={{ accentColor: "var(--green-bright)" }}
+                    style={{ accentColor: "var(--gold-bright)" }}
                     aria-describedby="iu-sharpen-hint"
                   />
                   <p id="iu-sharpen-hint" className="mt-1 text-[11px] text-muted">

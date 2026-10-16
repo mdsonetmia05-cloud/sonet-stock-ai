@@ -321,7 +321,7 @@ export default function BackgroundRemoverPage() {
                     value={tolerance}
                     onChange={(e) => setTolerance(Number(e.target.value))}
                     className="w-full"
-                    style={{ accentColor: "var(--green-bright)" }}
+                    style={{ accentColor: "var(--gold-bright)" }}
                     aria-describedby="br-tolerance-hint"
                   />
                   <p id="br-tolerance-hint" className="mt-1 text-[11px] text-muted">
@@ -346,7 +346,7 @@ export default function BackgroundRemoverPage() {
                           value={value}
                           checked={bgChoice === value}
                           onChange={() => setBgChoice(value)}
-                          style={{ accentColor: "var(--green-bright)" }}
+                          style={{ accentColor: "var(--gold-bright)" }}
                         />
                         {labelText}
                       </label>
