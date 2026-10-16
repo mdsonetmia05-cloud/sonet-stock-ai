@@ -13,8 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileDropzone } from "@/components/ui/file-dropzone";
 import { ConfirmDialog } from "@/components/ui/dialog";
-import { useAuth } from "@/components/providers";
-import { dbFor, bumpUsage, Job } from "@/lib/db";
+import { localDb, bumpUsage, Job } from "@/lib/db";
 import { uid, nowIso, formatBytes, truncate } from "@/lib/utils";
 import { downloadBlob } from "@/lib/csv";
 import { downloadZip } from "@/lib/zip";
@@ -73,7 +72,6 @@ function compositeOnColor(canvas: HTMLCanvasElement, color: string): HTMLCanvasE
 }
 
 export default function BackgroundRemoverPage() {
-  const { user } = useAuth();
   const [items, setItems] = useState<BgItem[]>([]);
   const [tolerance, setTolerance] = useState(32);
   const [bgChoice, setBgChoice] = useState<BgChoice>("transparent");
@@ -157,8 +155,8 @@ export default function BackgroundRemoverPage() {
 
   const runQueue = useCallback(
     async (onlyIds?: string[]) => {
-      if (!user || runningRef.current) return;
-      const db = dbFor(user.id);
+      if (runningRef.current) return;
+      const db = localDb();
       const { tolerance: tol, bgChoice: bg, format: fmt } = settingsRef.current;
       runningRef.current = true;
       setRunning(true);
@@ -206,7 +204,7 @@ export default function BackgroundRemoverPage() {
       runningRef.current = false;
       setRunning(false);
     },
-    [user, processOne, patchItem],
+    [processOne, patchItem],
   );
 
   const retryFailed = () => {
@@ -219,22 +217,19 @@ export default function BackgroundRemoverPage() {
       if (!item.result) return;
       const filename = `${baseName(item.file.name)}-bgremoved.${item.result.ext}`;
       downloadBlob(item.result.blob, filename);
-      if (user) {
-        const db = dbFor(user.id);
-        db.exports.upsert({
-          id: uid(), kind: "report", filename,
-          detail: `Background-removed image export (${item.result.ext.toUpperCase()}, ${formatBytes(item.result.bytes)})`,
-          sizeBytes: item.result.bytes, createdAt: nowIso(),
-        });
-        bumpUsage(db, { bytesExported: item.result.bytes });
-      }
+      const db = localDb();
+      db.exports.upsert({
+        id: uid(), kind: "report", filename,
+        detail: `Background-removed image export (${item.result.ext.toUpperCase()}, ${formatBytes(item.result.bytes)})`,
+        sizeBytes: item.result.bytes, createdAt: nowIso(),
+      });
+      bumpUsage(db, { bytesExported: item.result.bytes });
     },
-    [user],
+    [],
   );
 
   const downloadZipAll = useCallback(async () => {
-    if (!user) return;
-    const db = dbFor(user.id);
+    const db = localDb();
     const doneItems = itemsRef.current.filter((i) => i.status === "done" && i.result);
     const entries = doneItems.map((i) => ({
       name: `${baseName(i.file.name)}-bgremoved.${i.result!.ext}`,
@@ -249,7 +244,7 @@ export default function BackgroundRemoverPage() {
     });
     bumpUsage(db, { bytesExported: size });
     setSummary(`ZIP downloaded — ${entries.length} image(s).`);
-  }, [user]);
+  }, []);
 
   const clearAll = useCallback(() => {
     itemsRef.current.forEach((i) => {
@@ -326,7 +321,7 @@ export default function BackgroundRemoverPage() {
                     value={tolerance}
                     onChange={(e) => setTolerance(Number(e.target.value))}
                     className="w-full"
-                    style={{ accentColor: "var(--blue-bright)" }}
+                    style={{ accentColor: "var(--green-bright)" }}
                     aria-describedby="br-tolerance-hint"
                   />
                   <p id="br-tolerance-hint" className="mt-1 text-[11px] text-muted">
@@ -351,7 +346,7 @@ export default function BackgroundRemoverPage() {
                           value={value}
                           checked={bgChoice === value}
                           onChange={() => setBgChoice(value)}
-                          style={{ accentColor: "var(--blue-bright)" }}
+                          style={{ accentColor: "var(--green-bright)" }}
                         />
                         {labelText}
                       </label>
@@ -454,7 +449,7 @@ export default function BackgroundRemoverPage() {
                         {truncate(it.file.name, 40)}
                       </p>
                       <Badge
-                        tone={it.status === "done" ? "success" : it.status === "failed" ? "red" : it.status === "processing" ? "blue" : "neutral"}
+                        tone={it.status === "done" ? "success" : it.status === "failed" ? "red" : it.status === "processing" ? "info" : "neutral"}
                       >
                         {it.status}
                       </Badge>

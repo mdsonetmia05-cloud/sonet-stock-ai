@@ -31,7 +31,7 @@ import {
 const FEATURES = [
   { href: "/metadata-generator", icon: FileText, title: "AI Metadata Generator", desc: "Build titles, descriptions and keywords from on-device image analysis, adapted to each marketplace profile." },
   { href: "/image-to-prompt", icon: ImagePlus, title: "Image to Prompt", desc: "Turn a reference photo into a structured generation prompt from measured colors, lighting and composition." },
-  { href: "/stock-analysis", icon: Compass, title: "Stock Market Research", desc: "Plan shoots and topics with structured research notes — clearly labeled sample context, never fabricated sales data." },
+  { href: "/stock-analysis", icon: Compass, title: "Stock Market Research", desc: "Analyze your own portfolio CSV — real breakdowns by platform, category and keyword. Nothing estimated." },
   { href: "/prompt-generator", icon: Wand2, title: "AI Prompt Generator", desc: "Assemble detailed, disclosure-ready prompts from subject, style, lighting and composition controls." },
   { href: "/rejection-predictor", icon: ShieldAlert, title: "Rejection Risk Analysis", desc: "Heuristic quality checks for exposure, sharpness, noise and common rejection reasons before you upload." },
   { href: "/image-upscaler", icon: ZoomIn, title: "Bulk Image Upscaler", desc: "Basic browser-based canvas resampling at 2x or 4x. Honestly labeled — not AI super-resolution." },
@@ -42,7 +42,7 @@ const FEATURES = [
 
 const STEPS = [
   { icon: Search, title: "Research an opportunity", desc: "Check the event calendar and plan a shoot or generation topic with structured research notes." },
-  { icon: PencilLine, title: "Create and optimize assets", desc: "Generate prompts, prepare files, and write marketplace-ready metadata — all on-device in demo mode." },
+  { icon: PencilLine, title: "Create and optimize assets", desc: "Generate prompts, prepare files, and write marketplace-ready metadata — all on-device." },
   { icon: ClipboardCheck, title: "Review and prepare for submission", desc: "Run rejection-risk checks, export your files and metadata, then submit directly to each marketplace." },
 ];
 
@@ -57,12 +57,12 @@ const PLATFORMS = ["Adobe Stock", "Shutterstock", "Freepik", "Vecteezy", "Dreams
 
 const FAQS = [
   {
-    q: "What is demo mode?",
-    a: "This build runs entirely in your browser with on-device heuristics and sample data. Nothing is uploaded to a server, no real AI model is called, and every tool result is labeled so you know exactly what produced it. A production build can add server-side AI providers — see Settings for provider status.",
+    q: "How does it work?",
+    a: "Everything runs in your browser: image analysis, metadata assembly, prompt tools and file processing all happen on-device. Nothing is uploaded to a server. Optional server-side AI providers (Gemini, OpenAI, Anthropic) can be enabled with an API key — see Settings for provider status.",
   },
   {
     q: "Where is my data stored?",
-    a: "Locally, in your browser's localStorage, namespaced per user. SONET STOCK AI never sends your images, prompts or metadata to our servers — because in this build there are no servers receiving them. You can wipe all data from Settings at any time.",
+    a: "Locally, in your browser's localStorage. SONET STOCK AI never sends your images, prompts or metadata to any server. You can wipe all data from Settings at any time.",
   },
   {
     q: "Is SONET STOCK AI affiliated with Adobe Stock, Shutterstock, or the other platforms?",
@@ -70,7 +70,7 @@ const FAQS = [
   },
   {
     q: "Do I need to disclose AI-generated content?",
-    a: "Most major marketplaces require AI-generated or AI-assisted content to be disclosed and labeled at submission. This demo build helps you keep your prompts and workflow notes organized, but disclosure happens on each marketplace's own submission form — read their current contributor guidelines.",
+    a: "Most major marketplaces require AI-generated or AI-assisted content to be disclosed and labeled at submission. SONET STOCK AI helps you keep your prompts and workflow notes organized, but disclosure happens on each marketplace's own submission form — read their current contributor guidelines.",
   },
   {
     q: "Does SONET STOCK AI guarantee acceptance, downloads or income?",
@@ -78,7 +78,7 @@ const FAQS = [
   },
   {
     q: "How much does it cost?",
-    a: "This demo build is free and unlimited — everything runs on your device. If a paid production version with server-side AI is released, pricing will be published before any charge.",
+    a: "SONET STOCK AI is free and unlimited — everything runs on your device. If a version with paid server-side AI features is ever released, pricing will be published before any charge.",
   },
   {
     q: "Can I use the upscaler and background remover for final files?",
@@ -120,18 +120,15 @@ function PreviewMock() {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-foreground">Workspace overview</div>
-              <div className="text-[11px] text-muted">Demo mode — on-device heuristics & sample data</div>
+              <div className="text-[11px] text-muted">Your on-device workspace</div>
             </div>
-            <span className="rounded-full border border-primary/30 bg-primary/15 px-2.5 py-0.5 text-[10px] font-medium text-primaryBright">
-              DEMO
-            </span>
           </div>
           <div className="mb-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
             {[
-              ["Images processed", "128"],
-              ["Metadata records", "46"],
-              ["Prompts saved", "32"],
-              ["Research notes", "12"],
+              ["Images processed", "0"],
+              ["Metadata records", "0"],
+              ["Prompts saved", "0"],
+              ["Research notes", "0"],
             ].map(([label, val]) => (
               <div key={label} className="rounded-2xl border border-border bg-secondary/60 p-3">
                 <div className="text-[10px] uppercase tracking-wide text-muted">{label}</div>
@@ -142,7 +139,7 @@ function PreviewMock() {
           <div className="grid gap-2.5 sm:grid-cols-2">
             <div className="rounded-2xl border border-border bg-secondary/60 p-3">
               <div className="mb-2 text-[11px] font-medium text-foreground">
-                Weekly activity <span className="ml-1 rounded bg-secondary px-1.5 py-0.5 text-[9px] text-muted">SAMPLE</span>
+                Weekly activity
               </div>
               <div className="flex h-20 items-end gap-1.5">
                 {bars.map((h, i) => (
@@ -153,13 +150,13 @@ function PreviewMock() {
             <div className="rounded-2xl border border-border bg-secondary/60 p-3">
               <div className="mb-2 text-[11px] font-medium text-foreground">Recent jobs</div>
               {[
-                ["Eid campaign metadata", "completed", "blue"],
+                ["Eid campaign metadata", "completed", "info"],
                 ["Portrait batch upscaling", "processing", "amber"],
-                ["Winter keyword research", "completed", "blue"],
+                ["Winter keyword research", "completed", "info"],
               ].map(([t, s, tone]) => (
                 <div key={t} className="mb-1.5 flex items-center justify-between rounded-lg bg-background px-2.5 py-1.5">
                   <span className="text-[11px] text-foreground">{t}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[9px] ${tone === "blue" ? "bg-primary/15 text-primaryBright" : "bg-amber-500/15 text-amber-400"}`}>{s}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[9px] ${tone === "info" ? "bg-primary/15 text-primaryBright" : "bg-amber-500/15 text-amber-400"}`}>{s}</span>
                 </div>
               ))}
             </div>
@@ -167,7 +164,7 @@ function PreviewMock() {
         </div>
       </div>
       <p className="border-t border-border bg-secondary/40 px-4 py-2 text-center text-[10px] text-muted">
-        Illustrative preview — your real workspace starts empty. No marketplace data shown.
+        Preview mock-up — your real workspace starts empty. No marketplace data shown.
       </p>
     </div>
   );
@@ -192,7 +189,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-function BlueCard({
+function GreenCard({
   icon: Icon,
   title,
   desc,
@@ -223,7 +220,7 @@ function BlueCard({
     </>
   );
   const cls =
-    "rounded-3xl bg-gradient-to-br from-[#1d4ed8] to-[#2563eb] p-7 text-left transition-transform hover:-translate-y-0.5";
+    "rounded-3xl bg-gradient-to-br from-[#0e6e34] to-[#159447] p-7 text-left transition-transform hover:-translate-y-0.5";
   return href ? (
     <Link href={href} className={`group block ${cls}`}>
       {inner}
@@ -238,7 +235,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* top nav */}
-      <header className="sticky top-0 z-40 border-b border-border bg-[#0a0a0f]/95 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-border bg-[#0c0f0d]/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white">
@@ -288,7 +285,7 @@ export default function HomePage() {
       <section className="mx-auto max-w-6xl px-4 pb-16 pt-16 sm:px-6 md:pt-24">
         <div className="mx-auto max-w-3xl text-center">
           <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primaryBright">
-            <Sparkles size={13} /> On-device demo workspace for stock contributors
+            <Sparkles size={13} /> On-device workspace for stock contributors
           </span>
           <h1 className="text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
             Ideas Become Income.<br />
@@ -306,7 +303,7 @@ export default function HomePage() {
             </a>
           </div>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted">
-            {["100% on-device demo", "No account or API key needed", "Export anytime"].map((t) => (
+            {["100% on-device", "No account or API key needed", "Export anytime"].map((t) => (
               <span key={t} className="inline-flex items-center gap-1.5"><Check size={13} className="text-primaryBright" />{t}</span>
             ))}
           </div>
@@ -322,12 +319,12 @@ export default function HomePage() {
           <div className="mb-10 text-center">
             <h2 className="text-2xl font-bold md:text-3xl">Nine tools, one workflow</h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-muted">
-              Every tool runs on-device in this demo build and saves its results to your local workspace.
+              Every tool runs on-device and saves its results to your local workspace.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
-              <BlueCard key={f.href} href={f.href} icon={f.icon} title={f.title} desc={f.desc} />
+              <GreenCard key={f.href} href={f.href} icon={f.icon} title={f.title} desc={f.desc} />
             ))}
           </div>
         </div>
@@ -344,7 +341,7 @@ export default function HomePage() {
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {STEPS.map((s, i) => (
-              <BlueCard key={s.title} step={String(i + 1)} icon={s.icon} title={s.title} desc={s.desc} />
+              <GreenCard key={s.title} step={String(i + 1)} icon={s.icon} title={s.title} desc={s.desc} />
             ))}
           </div>
         </div>
@@ -358,7 +355,7 @@ export default function HomePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {CREATORS.map((c) => (
-              <BlueCard key={c.title} icon={c.icon} title={c.title} desc={c.desc} />
+              <GreenCard key={c.title} icon={c.icon} title={c.title} desc={c.desc} />
             ))}
           </div>
         </div>
@@ -398,7 +395,7 @@ export default function HomePage() {
       </section>
 
       {/* footer */}
-      <footer className="border-t border-border bg-[#0a0a0f]">
+      <footer className="border-t border-border bg-[#0c0f0d]">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex items-center gap-2">
