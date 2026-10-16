@@ -63,7 +63,7 @@ const NAV: NavGroup[] = [
 function Wordmark({ compact }: { compact?: boolean }) {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="SONET STOCK AI home">
-      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-base font-black text-white">
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-base font-black text-onPrimary">
         S
       </span>
       {!compact && (
@@ -134,7 +134,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* desktop sidebar */}
       <aside
         className={cn(
-          "sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-[#0c0f0d] transition-all md:flex",
+          "sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-background transition-all md:flex",
           collapsed ? "w-[76px]" : "w-64",
         )}
       >
@@ -157,7 +157,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} aria-hidden />
-          <aside className="absolute left-0 top-0 flex h-full w-72 animate-fade-in flex-col border-r border-border bg-[#0c0f0d]">
+          <aside className="absolute left-0 top-0 flex h-full w-72 animate-fade-in flex-col border-r border-border bg-background">
             <div className="flex items-center justify-between px-4 py-5">
               <Wordmark />
               <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="rounded-lg p-2 text-muted hover:bg-white/5">
@@ -171,7 +171,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* topbar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-[#0c0f0d] px-4">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background px-4">
           <button onClick={() => setMobileOpen(true)} aria-label="Open menu" className="rounded-lg p-2 text-muted hover:bg-white/5 md:hidden">
             <Menu size={20} />
           </button>

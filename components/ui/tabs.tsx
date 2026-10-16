@@ -29,7 +29,7 @@ export function Tabs({
           onClick={() => onChange(t.id)}
           className={cn(
             "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            active === t.id ? "bg-primary text-white" : "text-muted hover:text-foreground hover:bg-card",
+            active === t.id ? "bg-primary text-onPrimary" : "text-muted hover:text-foreground hover:bg-card",
           )}
         >
           {t.icon}

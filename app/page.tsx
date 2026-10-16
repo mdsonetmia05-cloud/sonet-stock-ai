@@ -131,7 +131,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-function GreenCard({
+function LuxCard({
   icon: Icon,
   title,
   desc,
@@ -147,22 +147,22 @@ function GreenCard({
   const inner = (
     <>
       {step && (
-        <span className="mb-5 block text-sm font-bold tracking-widest text-white/60">0{step}</span>
+        <span className="mb-5 block text-sm font-bold tracking-[0.2em] text-primaryBright">0{step}</span>
       )}
-      <span className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
-        <Icon size={22} className="text-white" />
+      <span className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10">
+        <Icon size={22} className="text-primaryBright" />
       </span>
-      <h3 className="text-lg font-bold text-white">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-white/80">{desc}</p>
+      <h3 className="text-lg font-bold text-foreground">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-muted">{desc}</p>
       {href && (
-        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-white">
+        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primaryBright">
           Open tool <ArrowRight size={15} />
         </span>
       )}
     </>
   );
   const cls =
-    "rounded-3xl bg-gradient-to-br from-[#0e6e34] to-[#159447] p-7 text-left transition-transform hover:-translate-y-0.5";
+    "rounded-3xl border border-border bg-card p-7 text-left shadow-[var(--shadow)] transition-all hover:-translate-y-0.5 hover:border-primary/40";
   return href ? (
     <Link href={href} className={`group block ${cls}`}>
       {inner}
@@ -317,7 +317,7 @@ export default function HomePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
-              <GreenCard key={f.href} href={f.href} icon={f.icon} title={f.title} desc={f.desc} />
+              <LuxCard key={f.href} href={f.href} icon={f.icon} title={f.title} desc={f.desc} />
             ))}
           </div>
         </div>
@@ -334,7 +334,7 @@ export default function HomePage() {
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {STEPS.map((s, i) => (
-              <GreenCard key={s.title} step={String(i + 1)} icon={s.icon} title={s.title} desc={s.desc} />
+              <LuxCard key={s.title} step={String(i + 1)} icon={s.icon} title={s.title} desc={s.desc} />
             ))}
           </div>
         </div>
@@ -348,7 +348,7 @@ export default function HomePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {CREATORS.map((c) => (
-              <GreenCard key={c.title} icon={c.icon} title={c.title} desc={c.desc} />
+              <LuxCard key={c.title} icon={c.icon} title={c.title} desc={c.desc} />
             ))}
           </div>
         </div>
@@ -388,11 +388,11 @@ export default function HomePage() {
       </section>
 
       {/* footer */}
-      <footer className="border-t border-border bg-[#0c0f0d]">
+      <footer className="border-t border-border bg-background">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-onPrimary">
                 <Sparkles size={15} />
               </span>
               <span className="text-sm font-extrabold">SONET <span className="text-primaryBright">STOCK AI</span></span>

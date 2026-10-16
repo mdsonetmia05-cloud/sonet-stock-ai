@@ -2,35 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-/* SONET STOCK AI design tokens — dark + green system */
+/* SONET STOCK AI design tokens — cinematic dark luxury system */
 :root,
 [data-theme="dark"] {
-  --bg: #101310;
-  --bg-secondary: #181d19;
-  --card: #1c231e;
-  --green: #159447;
-  --green-bright: #25c96a;
-  --green-deep: #0e6e34;
-  --red: #e63946;
-  --text: #f4f7f4;
-  --text-secondary: #a7b2a9;
-  --border: #303a32;
-  --shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  --bg: #0b0b0c;
+  --bg-secondary: #131315;
+  --card: #17171a;
+  --gold: #c9a86a;
+  --gold-bright: #ddbb7e;
+  --gold-deep: #8a6e3f;
+  --on-gold: #0b0b0c;
+  --red: #d95d5d;
+  --text: #f4f1ea;
+  --text-secondary: #a8a29a;
+  --border: rgba(255, 255, 255, 0.08);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
   color-scheme: dark;
 }
 
 [data-theme="light"] {
-  --bg: #f4f7f4;
-  --bg-secondary: #e7ece7;
+  --bg: #f4f1ea;
+  --bg-secondary: #eae5d8;
   --card: #ffffff;
-  --green: #159447;
-  --green-bright: #0e6e34;
-  --green-deep: #0a5527;
-  --red: #d13438;
-  --text: #101310;
-  --text-secondary: #5a665c;
-  --border: #d8ded8;
-  --shadow: 0 8px 24px rgba(16, 19, 16, 0.08);
+  --gold: #a8823f;
+  --gold-bright: #c9a86a;
+  --gold-deep: #7a5f33;
+  --on-gold: #1a1815;
+  --red: #c05050;
+  --text: #1a1815;
+  --text-secondary: #6b6560;
+  --border: rgba(0, 0, 0, 0.1);
+  --shadow: 0 8px 24px rgba(26, 24, 21, 0.08);
   color-scheme: light;
 }
 
@@ -46,8 +48,8 @@ body {
 }
 
 ::selection {
-  background: var(--green);
-  color: #fff;
+  background: var(--gold);
+  color: var(--on-gold);
 }
 
 /* thin scrollbars */
@@ -66,7 +68,7 @@ body {
 
 /* focus visibility for keyboard users */
 :focus-visible {
-  outline: 2px solid var(--green-bright);
+  outline: 2px solid var(--gold-bright);
   outline-offset: 2px;
 }
 
@@ -84,13 +86,13 @@ body {
 /* transparency checkerboard (preview only — real exports keep genuine alpha) */
 .checkerboard {
   background-image:
-    linear-gradient(45deg, #2a332b 25%, transparent 25%),
-    linear-gradient(-45deg, #2a332b 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #2a332b 75%),
-    linear-gradient(-45deg, transparent 75%, #2a332b 75%);
+    linear-gradient(45deg, #26262a 25%, transparent 25%),
+    linear-gradient(-45deg, #26262a 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #26262a 75%),
+    linear-gradient(-45deg, transparent 75%, #26262a 75%);
   background-size: 20px 20px;
   background-position: 0 0, 0 10px, 10px -10px, -10px 0;
-  background-color: #232b24;
+  background-color: #1e1e22;
 }
 
 @keyframes fade-in {
