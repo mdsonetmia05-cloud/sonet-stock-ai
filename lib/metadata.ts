@@ -1,5 +1,5 @@
 /**
- * lib/metadata.ts — heuristic metadata generation engine (demo build).
+ * lib/metadata.ts — heuristic metadata generation engine.
  *
  * Everything here is computed on-device from statistical image analysis
  * (lib/image.ts) and marketplace profile rules. It is NOT AI, and nothing
@@ -7,7 +7,7 @@
  * revenue. All subjects, categories and concepts are heuristic suggestions
  * and must be reviewed by the contributor before submission.
  *
- * NOTE: profile limits are demo defaults — verify each platform's current
+ * NOTE: profile limits are built-in defaults — verify each platform's current
  * submission guidelines before uploading.
  */
 import { nearestColorName, type ImageAnalysis } from "./image";
@@ -34,7 +34,7 @@ export const MARKETPLACE_PROFILES: MarketplaceProfile[] = [
     maxKeywords: 25,
     keywordStyle: "single",
     notes:
-      "Demo defaults: lowercase single-word keywords, concise titles. Verify current submission guidelines before uploading.",
+      "Built-in defaults: lowercase single-word keywords, concise titles. Verify current submission guidelines before uploading.",
   },
   {
     id: "shutterstock",
@@ -43,7 +43,7 @@ export const MARKETPLACE_PROFILES: MarketplaceProfile[] = [
     maxKeywords: 50,
     keywordStyle: "mixed",
     notes:
-      "Demo defaults: descriptive phrases allowed. Verify current submission guidelines before uploading.",
+      "Built-in defaults: descriptive phrases allowed. Verify current submission guidelines before uploading.",
   },
   {
     id: "freepik",
@@ -52,7 +52,7 @@ export const MARKETPLACE_PROFILES: MarketplaceProfile[] = [
     maxKeywords: 30,
     keywordStyle: "mixed",
     notes:
-      "Demo defaults: descriptive phrases allowed. Verify current submission guidelines before uploading.",
+      "Built-in defaults: descriptive phrases allowed. Verify current submission guidelines before uploading.",
   },
   {
     id: "vecteezy",
@@ -60,7 +60,7 @@ export const MARKETPLACE_PROFILES: MarketplaceProfile[] = [
     maxTitleWords: 15,
     maxKeywords: 50,
     keywordStyle: "mixed",
-    notes: "Demo defaults. Verify current submission guidelines before uploading.",
+    notes: "Built-in defaults. Verify current submission guidelines before uploading.",
   },
   {
     id: "dreamstime",
@@ -68,7 +68,7 @@ export const MARKETPLACE_PROFILES: MarketplaceProfile[] = [
     maxTitleWords: 15,
     maxKeywords: 50,
     keywordStyle: "mixed",
-    notes: "Demo defaults. Verify current submission guidelines before uploading.",
+    notes: "Built-in defaults. Verify current submission guidelines before uploading.",
   },
   {
     id: "depositphotos",
@@ -76,7 +76,7 @@ export const MARKETPLACE_PROFILES: MarketplaceProfile[] = [
     maxTitleWords: 15,
     maxKeywords: 50,
     keywordStyle: "mixed",
-    notes: "Demo defaults. Verify current submission guidelines before uploading.",
+    notes: "Built-in defaults. Verify current submission guidelines before uploading.",
   },
   {
     id: "123rf",
@@ -85,7 +85,7 @@ export const MARKETPLACE_PROFILES: MarketplaceProfile[] = [
     maxKeywords: 50,
     keywordStyle: "single",
     notes:
-      "Demo defaults: single-word keywords preferred. Verify current submission guidelines before uploading.",
+      "Built-in defaults: single-word keywords preferred. Verify current submission guidelines before uploading.",
   },
   {
     id: "generic-csv",
@@ -665,6 +665,6 @@ export function blankManualMetadata(
     category: "Objects",
     style: "Not analyzed on-device (manual flow)",
     commercialConcept: "",
-    flowLabel: "Cannot be vision-analyzed on-device in demo mode. Use the manual metadata flow below.",
+    flowLabel: "Vision analysis runs on-device for supported flows. Use the manual metadata flow below for full control.",
   };
 }

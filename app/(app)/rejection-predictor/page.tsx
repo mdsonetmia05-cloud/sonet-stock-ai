@@ -12,8 +12,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileDropzone } from "@/components/ui/file-dropzone";
 import { Progress } from "@/components/ui/progress";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useAuth } from "@/components/providers";
-import { dbFor, bumpUsage, type QcReport, type QcFinding } from "@/lib/db";
+import { localDb, bumpUsage, type QcReport, type QcFinding } from "@/lib/db";
 import { downloadTextFile } from "@/lib/csv";
 import { loadImageFromFile, analyzeImage, sharpnessScore, exposureReport, noiseEstimate } from "@/lib/image";
 import { uid, nowIso, cn, formatDateTime } from "@/lib/utils";
@@ -169,7 +168,6 @@ const LEVEL_TONE: Record<QcFinding["level"], "success" | "amber" | "red"> = { pa
 const ACCEPT_EXTS = ["jpg", "jpeg", "png", "webp"];
 
 export default function RejectionPredictorPage() {
-  const { user, signIn } = useAuth();
 
   const [images, setImages] = useState<AnalyzedImage[]>([]);
   const [unchecked, setUnchecked] = useState<Record<string, Set<GuidelineId>>>({});
@@ -177,9 +175,7 @@ export default function RejectionPredictorPage() {
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [history, setHistory] = useState<QcReport[]>(() =>
-    user ? dbFor(user.id).qcReports.all() : [],
-  );
+  const [history, setHistory] = useState<QcReport[]>(() => localDb().qcReports.all());
   const [savedIds, setSavedIds] = useState<Record<string, string>>({});
   const runToken = useRef(0);
 
@@ -188,20 +184,7 @@ export default function RejectionPredictorPage() {
     [images, unchecked],
   );
 
-  if (!user) {
-    return (
-      <div className="mx-auto max-w-xl pt-16">
-        <EmptyState
-          icon={<ShieldCheck size={40} />}
-          title="Sign in to use the Rejection Predictor"
-          description="Your QC reports and outcomes are stored per user."
-          action={<Button onClick={() => signIn("Demo Creator", "demo@sonetstock.ai")}>Continue as demo creator</Button>}
-        />
-      </div>
-    );
-  }
-
-  const db = dbFor(user.id);
+  const db = localDb();
 
   const toggleGuideline = (imgId: string, gid: GuidelineId) => {
     setUnchecked((prev) => {
@@ -412,7 +395,7 @@ export default function RejectionPredictorPage() {
                       {img.width}×{img.height} · {img.orientation} · brightness {img.brightnessPct}%
                     </p>
                     <div className="mt-3 flex items-center gap-3">
-                      <Progress value={risk.score} tone={risk.score >= 75 ? "success" : risk.score >= 45 ? "blue" : "red"} className="max-w-xs" />
+                      <Progress value={risk.score} tone={risk.score >= 75 ? "success" : risk.score >= 45 ? "info" : "red"} className="max-w-xs" />
                       <span className="text-lg font-bold text-foreground">{risk.score}<span className="text-sm font-normal text-muted">/100 safer</span></span>
                     </div>
                     <p className="mt-1 text-xs text-muted">{meta.text}</p>

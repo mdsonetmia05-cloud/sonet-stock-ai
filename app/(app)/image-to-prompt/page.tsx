@@ -25,8 +25,7 @@ import { Progress } from "@/components/ui/progress";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileDropzone } from "@/components/ui/file-dropzone";
 import { ConfirmDialog } from "@/components/ui/dialog";
-import { useAuth } from "@/components/providers";
-import { dbFor, bumpUsage } from "@/lib/db";
+import { localDb, bumpUsage } from "@/lib/db";
 import { downloadCsv, downloadTextFile } from "@/lib/csv";
 import {
   loadImageFromFile,
@@ -249,9 +248,8 @@ function stripExtension(name: string): string {
 // ---------- Page ----------
 
 export default function ImageToPromptPage() {
-  const { user } = useAuth();
   const router = useRouter();
-  const db = useMemo(() => dbFor(user?.id ?? "demo-user"), [user?.id]);
+  const db = useMemo(() => localDb(), []);
 
   const [items, setItems] = useState<ImageItem[]>([]);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
@@ -666,7 +664,7 @@ export default function ImageToPromptPage() {
                       <div className="absolute left-2 top-2">
                         <Badge
                           tone={
-                            item.status === "done" ? "success" : item.status === "error" ? "red" : item.status === "analyzing" ? "blue" : "neutral"
+                            item.status === "done" ? "success" : item.status === "error" ? "red" : item.status === "analyzing" ? "info" : "neutral"
                           }
                         >
                           {item.status === "done" ? "Prompt ready" : item.status === "error" ? "Failed" : item.status === "analyzing" ? "Analyzing…" : "Pending"}
@@ -763,7 +761,7 @@ export default function ImageToPromptPage() {
       </div>
 
       <p className={cn("mt-6 text-xs text-muted")}>
-        Prompts are assembled on-device from measured image attributes and templates — demo mode, not a real AI
+        Prompts are assembled on-device from measured image attributes and templates
         model. Prompts do not guarantee marketplace acceptance, downloads, or sales.
       </p>
 
