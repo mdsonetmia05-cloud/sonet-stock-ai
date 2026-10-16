@@ -179,7 +179,7 @@ export default function HomePage() {
       {/* ===== CINEMATIC HERO ===== */}
       <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black">
         <Image
-          src="/hero-cinematic.jpg"
+          src="/hero-bg.webp"
           alt="Samurai silhouette on a grassy hilltop overlooking a foggy city skyline"
           fill
           priority
