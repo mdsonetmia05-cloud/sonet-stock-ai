@@ -6,13 +6,13 @@ This file is the single source of truth for parallel builders. Follow it exactly
 `~/workspace/sonet-stock-ai`. Next.js 14 (App Router), React 18, TypeScript (strict), Tailwind 3, lucide-react, jszip. No shadcn — use `components/ui/*`.
 
 ## 1. Absolute honesty rules (violating these fails the project)
-1. NEVER fabricate marketplace download counts, rankings, sales, contributor identities, or revenue. Unavailable data renders as **"n/a — not exposed"**. Sample data is badged **SAMPLE**.
-2. Every tool page (`/image-to-prompt`, `/metadata-generator`, `/batch-editor`, `/prompt-generator`, `/stock-analysis`, `/rejection-predictor`, `/background-remover`, `/image-upscaler`, `/event-calendar`, `/dashboard`) must render `<PageHeader demo />` (it includes the DemoBadge: "Demo mode — on-device heuristics & sample data").
+1. NEVER fabricate marketplace download counts, rankings, sales, contributor identities, or revenue. Portfolio Analysis only reports numbers computed from the user's uploaded CSV.
+2. Every tool page (`/image-to-prompt`, `/metadata-generator`, `/batch-editor`, `/prompt-generator`, `/stock-analysis`, `/rejection-predictor`, `/background-remover`, `/image-upscaler`, `/event-calendar`, `/dashboard`) must render `<PageHeader title description actions />` with no mode badges.
 3. Upscaler output is canvas resampling — label every result **"Basic browser upscaling (not AI)"**.
 4. Background remover uses `removeBackgroundFloodFill` (genuine alpha channel). Label **"Basic background removal (not AI)"**. Preview transparency on the `.checkerboard` CSS class — never ship a fake checkerboard image as the export.
-5. Never claim EXIF/IPTC metadata was embedded. Offer CSV export + copy; note embedding as "not performed in demo build".
+5. Never claim EXIF/IPTC metadata was embedded. Offer CSV export + copy; note embedding as "not performed".
 6. No copy may promise acceptance, downloads, sales, or income anywhere.
-7. No API keys anywhere in frontend code, storage, or network calls. Provider abstraction lives in `lib/providers.ts` (DemoProvider only). `/api/ai` is a status stub.
+7. No API keys anywhere in frontend code, storage, or network calls. Server provider status lives in `lib/providers.ts` (`fetchServerProviderStatus`). `/api/ai` reports key presence only.
 8. Every button must work. No decorative dead controls. Every tool needs real loading / success / empty / error states.
 
 ## 2. Routes (all under `app/(app)/<route>/page.tsx`, each a client component)
@@ -34,26 +34,26 @@ This file is the single source of truth for parallel builders. Follow it exactly
 | / (public) | app/page.tsx |
 
 ## 3. Importable building blocks
-- UI: `@/components/ui/button` (Button), `card` (Card, CardHeader, CardTitle, StatCard), `input` (Input, Textarea, Label), `select` (Select), `badge` (Badge tone: green|red|neutral|amber|blue), `progress` (Progress value 0-100), `dialog` (Dialog, ConfirmDialog), `tabs` (Tabs), `skeleton` (Skeleton, SkeletonCard), `empty-state` (EmptyState), `file-dropzone` (FileDropzone props: accept, multiple, maxFiles, onFiles, label, hint, compact), `demo-badge` (DemoBadge), `page-header` (PageHeader {title, description, actions, demo}).
-- Auth/theme: `@/components/providers` → `useAuth()` {user:{id,name,email}, signIn, signOut}, `useTheme()` {theme, toggle, setTheme}.
-- DB: `@/lib/db` → `dbFor(userId)` returns `{ jobs, prompts, metadata, research, favorites, exports, qcReports, usage, preferences, wipe() }`. Each repo: `all() get(id) upsert(item) remove(id) clear() count()`. Types: Job {id,type,title,status,total,done,failed,note?,createdAt,updatedAt}, PromptRecord {id,text,negative?,category,mode?,favorite,source,createdAt}, MetadataRecord {id,jobId?,filename,title,description,keywords[],category,style?,commercialConcept?,platform,createdAt}, ResearchProject {id,query,platform,assetType,category,resultCount,createdAt}, FavoriteItem {id,kind:"prompt"|"event"|"topic"|"result",refId,label,createdAt}, ExportRecord {id,kind:"csv"|"txt"|"zip"|"report",filename,detail,sizeBytes?,createdAt}, QcReport {id,filename,risk:"low"|"review"|"high",score,findings:QcFinding[],outcome:"accepted"|"rejected"|null,createdAt}, QcFinding {category,level:"pass"|"warn"|"fail",detail,suggestion}. Helpers: `bumpUsage(db, {imagesProcessed?, metadataGenerated?, promptsCreated?, bytesExported?})`, `DEFAULT_PREFERENCES`.
-- CSV: `@/lib/csv` → `downloadCsv(filename, columns, rows)`, `downloadTextFile(filename, text, mime?)`, `downloadBlob(blob, filename)`, `toCsv`, `escapeCsvField`.
+- UI: `@/components/ui/button` (Button), `card` (Card, CardHeader, CardTitle, StatCard), `input` (Input, Textarea, Label), `select` (Select), `badge` (Badge tone: success|red|neutral|amber|info), `progress` (Progress value 0-100), `dialog` (Dialog, ConfirmDialog), `tabs` (Tabs), `skeleton` (Skeleton, SkeletonCard), `empty-state` (EmptyState), `file-dropzone` (FileDropzone props: accept, multiple, maxFiles, onFiles, label, hint, compact, batchLimit, formats), `page-header` (PageHeader {title, description, actions}).
+- Theme: `@/components/providers` → `useTheme()` {theme, toggle, setTheme}. No auth — the app opens directly.
+- DB: `@/lib/db` → `localDb()` returns `{ jobs, prompts, metadata, research, favorites, exports, qcReports, usage, preferences, wipe() }` (single on-device workspace, `LOCAL_USER_ID = "local"`). Each repo: `all() get(id) upsert(item) remove(id) clear() count()`. Types: Job {id,type,title,status,total,done,failed,note?,createdAt,updatedAt}, PromptRecord {id,text,negative?,category,mode?,favorite,source,createdAt}, MetadataRecord {id,jobId?,filename,title,description,keywords[],category,style?,commercialConcept?,platform,createdAt}, ResearchProject {id,query,platform,assetType,category,resultCount,createdAt}, FavoriteItem {id,kind:"prompt"|"event"|"topic"|"result",refId,label,createdAt}, ExportRecord {id,kind:"csv"|"txt"|"zip"|"report",filename,detail,sizeBytes?,createdAt}, QcReport {id,filename,risk:"low"|"review"|"high",score,findings:QcFinding[],outcome:"accepted"|"rejected"|null,createdAt}, QcFinding {category,level:"pass"|"warn"|"fail",detail,suggestion}. Helpers: `bumpUsage(db, {imagesProcessed?, metadataGenerated?, promptsCreated?, bytesExported?})`, `DEFAULT_PREFERENCES`.
+- CSV: `@/lib/csv` → `downloadCsv(filename, columns, rows)`, `downloadTextFile(filename, text, mime?)`, `downloadBlob(blob, filename)`, `toCsv`, `escapeCsvField`, `parseCsv(text)`.
 - ZIP: `@/lib/zip` → `downloadZip(filename, [{name, blob}])`.
 - Image: `@/lib/image` → `loadImageFromFile(file)`, `analyzeImage(img)` → ImageAnalysis {width,height,orientation,brightness,contrast,saturation,warmth,edgeDensity,dominantColors[{hex,pct}],isMostlyDark,isMostlyBright}, `sharpnessScore(img)` 0-100, `exposureReport(img)` {shadowClipPct,highlightClipPct,verdict}, `noiseEstimate(img)` 0-100, `removeBackgroundFloodFill(img, tolerance 0-100, maxDim?)` → {canvas,removedPct,width,height}, `upscaleCanvas(img, 2|4, {denoise,sharpen})`, `canvasToBlob(canvas, type, quality?)`, `describeAnalysis(a)` string[], `nearestColorName(hex)`, `drawToCanvas(img, maxDim)`.
-- Providers: `@/lib/providers` → `getActiveProvider()` (always demo in this build), `fetchServerProviderStatus()`.
+- Providers: `@/lib/providers` → `fetchServerProviderStatus()` (server key presence). The built-in on-device engine needs no key.
 - Events: `@/lib/events` → `getEventsForYear(year)`, `filterEvents(events, {country,category,query,favoritesOnly,favoriteIds})`, `EVENT_CATEGORIES`, `COUNTRIES`, `DATE_TYPE_LABEL`, StockEvent {id,name,date,dateType:"verified"|"computed"|"approximate",dateNote?,region,categories[],productionWindow,contentSuggestions[],keywords[],commercialUses[],priority}.
 - Utils: `@/lib/utils` → `cn, uid, nowIso, formatDate, formatDateTime, formatBytes, truncate`.
 
 ## 4. Conventions
 - `"use client"` at top of every page. Guard `window`/`document` usage (components render client-side only anyway).
 - Brand tokens via Tailwind: `bg-background bg-secondary bg-card text-foreground text-muted border-border bg-primary text-primaryBright bg-danger`. Rounded `rounded-2xl`, borders `border-border`.
-- Page structure: `<PageHeader title="…" description="…" actions={…} />` then content. DemoBadge included automatically.
+- Page structure: `<PageHeader title="…" description="…" actions={…} />` then content.
 - Persist user work: create Job records for bulk operations; save prompts to `db.prompts`; metadata to `db.metadata`; QC to `db.qcReports`; research to `db.research`; every download to `db.exports`; call `bumpUsage` appropriately.
-- Favorites: prompt-generator + event-calendar + stock-analysis write to `db.favorites` (kind: prompt|event|topic).
+- Favorites: prompt-generator + event-calendar write to `db.favorites` (kind: prompt|event).
 - Long loops: process files sequentially with `await` + small yields (`await new Promise(r=>setTimeout(r,0))`) so the UI stays responsive; show Progress.
 - Accessible labels on all form controls. Keyboard-operable dialogs (Escape closes — already handled).
 - Copy-to-clipboard: `navigator.clipboard.writeText` with try/catch fallback + "Copied" feedback.
-- NEVER invent marketplace metrics. The stock-analysis page uses a clearly-labeled SAMPLE dataset only.
+- NEVER invent marketplace metrics. Portfolio Analysis computes only from the user's uploaded CSV.
 - File validation: check `file.type` and extension; show per-file errors; never process a file you cannot decode.
 
 ## 5. Marketplace profiles (metadata-generator)

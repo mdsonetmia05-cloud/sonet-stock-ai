@@ -1,26 +1,26 @@
 # SONET STOCK AI — Implementation Plan
 
-**Status:** Demo build complete. All 14 routes render, `npm run build` passes.
+**Status:** Production build complete. All 14 routes render, `npm run build` passes.
 
 ## 1. What was built (per phase)
 
 | Phase | Scope | Status |
 |---|---|---|
-| 0 | Scaffold (Next.js 14 + TS + Tailwind), design tokens, CSS-variable theming, app shell (sidebar/topbar/breadcrumbs/mobile drawer), demo auth, UI component library, lib (db/csv/image/zip/providers/events), `/api/ai` stub, CONTRACT.md | ✅ |
+| 0 | Scaffold (Next.js 14 + TS + Tailwind), design tokens, CSS-variable theming, app shell (sidebar/topbar/breadcrumbs/mobile drawer), UI component library, lib (db/csv/image/zip/providers/events), `/api/ai` provider status probe, CONTRACT.md | ✅ |
 | 1 | Homepage, dashboard, settings, history, help | ✅ |
 | 2 | Image-to-Prompt, Prompt Generator, Metadata Generator (core, `lib/metadata.ts`) | ✅ |
 | 3 | Batch Editor (bounded concurrency 3, pause/cancel/retry/resume, ZIP + manifest CSV) | ✅ |
-| 4 | Stock Analysis (sample dataset), Rejection Predictor (real measurements), Event Calendar (computed dates) | ✅ |
+| 4 | Portfolio Analysis (user CSV), Rejection Predictor (real measurements), Event Calendar (computed dates) | ✅ |
 | 5 | Background Remover (real flood-fill alpha), Image Upscaler (honest canvas resampling) | ✅ |
 | 6 | Build verification, smoke test, docs | ✅ |
 
 ## 2. Architecture
 
-- **Frontend:** Next.js 14 App Router. Public `/` landing; protected `app/(app)/*` routes behind `AppShell` (local demo sign-in screen when logged out).
-- **State/data:** `lib/db.ts` — typed localStorage repositories namespaced `ssa:v1:<userId>:<collection>`. No server DB in this build.
+- **Frontend:** Next.js 14 App Router. Public `/` landing; `app/(app)/*` workspace routes inside `AppShell`. No accounts — the app opens directly.
+- **State/data:** `lib/db.ts` — typed localStorage repositories namespaced `ssa:v1:local:<collection>`. No server DB; all data stays in the browser.
 - **Image engine:** `lib/image.ts` — canvas-based measurement (histogram, quantization, Sobel edges, Laplacian sharpness, clipping, noise) + flood-fill background removal (genuine alpha) + honest canvas upscaling.
-- **Providers:** `lib/providers.ts` — `AIProvider` interface; `DemoProvider` (on-device heuristics) is the only active provider. `/api/ai` reports key presence (never keys) and 501s on POST until wired.
-- **Honesty layer:** `DemoBadge` on every tool page; sample data badged SAMPLE; unavailable marketplace metrics render "n/a — not exposed"; upscaler/bg-remover carry "not AI" labels; no acceptance/download/income promises in copy.
+- **Providers:** `lib/providers.ts` — server provider status via `/api/ai` (reports key presence, never keys; 501s on POST until wired). The built-in on-device engine powers image analysis, metadata and prompt tools with no API key.
+- **Honesty layer:** no fabricated metrics — Portfolio Analysis only reports numbers computed from the user's uploaded CSV; upscaler/bg-remover carry "not AI" labels; no acceptance/download/income promises in copy.
 
 ## 3. Data model (intended Postgres schema for production)
 
@@ -71,15 +71,15 @@ Indexes: `jobs(user_id, created_at desc)`, `metadata_records(user_id, job_id)`, 
 
 No secrets are committed. `.env.example` documents the vars (values empty).
 
-## 5. Demo vs production notes
+## 5. Current build vs future server deployment
 
-- **Demo:** all "AI" is on-device heuristics; research data is an illustrative sample; auth is local; files never leave the browser; EXIF/IPTC embedding not performed.
-- **Production path:** implement real provider calls in `/api/ai` (server-only, keys from env), replace `dbFor` with Supabase + RLS, move uploads to private storage, add a background queue (e.g. BullMQ) for large batches, wire licensed/authorized research data sources, add rate limiting + audit logging.
+- **Current:** all processing is on-device; portfolio analysis works from the user's uploaded CSV; no accounts; files never leave the browser; EXIF/IPTC embedding not performed.
+- **Future path:** implement real provider calls in `/api/ai` (server-only, keys from env), replace `localDb` with Supabase + RLS, move uploads to private storage, add a background queue (e.g. BullMQ) for large batches, wire licensed/authorized research data sources, add rate limiting + audit logging.
 
 ## 6. Known limitations
 
 - Background removal is flood-fill from edges: best on solid/near-solid backgrounds; complex scenes need manual masking.
 - Upscaling is bicubic canvas resampling + optional denoise/sharpen — no detail synthesis.
 - Event dates for lunar/lunisolar observances (Eid, Diwali, Holi, Chinese New Year) are approximate — users must confirm locally.
-- Research "downloads" are never shown (marketplaces don't expose them); the dataset is illustrative.
+- Portfolio Analysis shows download numbers only when the uploaded CSV includes a downloads column.
 - Client-side processing caps: upscaler caps long side at 8000px; very large batches should move to a server queue in production.

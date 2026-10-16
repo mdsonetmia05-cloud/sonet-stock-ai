@@ -48,3 +48,44 @@ export function downloadCsv(
   downloadBlob(blob, filename);
   return blob.size;
 }
+
+/** Minimal RFC-4180 CSV parser. Returns rows as objects keyed by header names. */
+export function parseCsv(text: string): Array<Record<string, string>> {
+  // strip BOM
+  const src = text.replace(/^\uFEFF/, "");
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
+  let inQuotes = false;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (src[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else {
+        field += c;
+      }
+    } else if (c === '"') {
+      inQuotes = true;
+    } else if (c === ",") {
+      row.push(field); field = "";
+    } else if (c === "\n") {
+      row.push(field); field = "";
+      rows.push(row); row = [];
+    } else if (c === "\r") {
+      // ignore; \n handles the break
+    } else {
+      field += c;
+    }
+  }
+  if (field !== "" || row.length > 0) { row.push(field); rows.push(row); }
+  const nonEmpty = rows.filter((r) => r.some((f) => f.trim() !== ""));
+  if (nonEmpty.length === 0) return [];
+  const headers = nonEmpty[0].map((h) => h.trim());
+  return nonEmpty.slice(1).map((r) => {
+    const obj: Record<string, string> = {};
+    headers.forEach((h, i) => { obj[h] = (r[i] ?? "").trim(); });
+    return obj;
+  });
+}

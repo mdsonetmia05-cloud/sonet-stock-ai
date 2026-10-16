@@ -23,13 +23,11 @@ export function StatCard({
   value,
   icon,
   hint,
-  sample,
 }: {
   label: string;
   value: string | number;
   icon?: ReactNode;
   hint?: string;
-  sample?: boolean;
 }) {
   return (
     <Card className="flex flex-col gap-1">
@@ -39,11 +37,6 @@ export function StatCard({
       </div>
       <div className="flex items-baseline gap-2">
         <span className="text-3xl font-bold text-foreground">{value}</span>
-        {sample && (
-          <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-semibold text-muted">
-            SAMPLE
-          </span>
-        )}
       </div>
       {hint && <p className="text-xs text-muted">{hint}</p>}
     </Card>

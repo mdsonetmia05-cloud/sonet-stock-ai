@@ -7,7 +7,7 @@ export function Progress({
 }: {
   value: number; // 0-100
   className?: string;
-  tone?: "success" | "red" | "blue";
+  tone?: "success" | "red" | "info";
 }) {
   const v = Math.max(0, Math.min(100, value));
   return (
@@ -23,7 +23,7 @@ export function Progress({
           "h-full rounded-full transition-all duration-300",
           tone === "success" && "bg-primaryBright",
           tone === "red" && "bg-danger",
-          tone === "blue" && "bg-blue-500",
+          tone === "info" && "bg-primaryBright",
         )}
         style={{ width: `${v}%` }}
       />

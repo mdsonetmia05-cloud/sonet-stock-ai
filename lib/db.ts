@@ -1,10 +1,10 @@
 /**
- * lib/db.ts — client-side data layer (demo build).
+ * lib/db.ts — client-side data layer.
  *
- * All user data is stored in localStorage under a per-user namespace:
- *   ssa:v1:<userId>:<collection>
- * No data leaves the browser. In production this maps to Postgres tables
- * documented in PLAN.md (same entity names).
+ * All workspace data is stored in localStorage under a single local namespace:
+ *   ssa:v1:local:<collection>
+ * No data leaves the browser. In a server deployment this maps to Postgres
+ * tables documented in PLAN.md (same entity names).
  */
 import { uid } from "./utils";
 
@@ -247,6 +247,14 @@ export function dbFor(userId: string) {
 }
 
 export type DB = ReturnType<typeof dbFor>;
+
+/** Single local workspace namespace — the app has no accounts; all data is on-device. */
+export const LOCAL_USER_ID = "local";
+
+/** Database facade for the local workspace. */
+export function localDb(): DB {
+  return dbFor(LOCAL_USER_ID);
+}
 
 /** Bump a daily usage counter. */
 export function bumpUsage(db: DB, patch: Partial<Omit<UsageRecord, "date">>): void {
