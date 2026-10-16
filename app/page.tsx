@@ -1,6 +1,8 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { Anton, Caveat } from "next/font/google";
 import {
   Sparkles,
   LayoutDashboard,
@@ -17,7 +19,6 @@ import {
   PencilLine,
   ClipboardCheck,
   ArrowRight,
-  Check,
   Plus,
   Minus,
   Menu,
@@ -27,6 +28,9 @@ import {
   Clapperboard,
   Megaphone,
 } from "lucide-react";
+
+const anton = Anton({ subsets: ["latin"], weight: "400", display: "swap" });
+const caveat = Caveat({ subsets: ["latin"], weight: ["700"], display: "swap" });
 
 const FEATURES = [
   { href: "/metadata-generator", icon: FileText, title: "AI Metadata Generator", desc: "Build titles, descriptions and keywords from on-device image analysis, adapted to each marketplace profile." },
@@ -86,89 +90,27 @@ const FAQS = [
   },
 ];
 
-function PreviewMock() {
-  const bars = [42, 68, 55, 80, 62, 90, 74, 58, 84, 66, 78, 52];
-  return (
-    <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-2xl">
-      {/* browser chrome */}
-      <div className="flex items-center gap-1.5 border-b border-border bg-secondary px-4 py-3">
-        <span className="h-2.5 w-2.5 rounded-full bg-danger/70" />
-        <span className="h-2.5 w-2.5 rounded-full bg-amber-500/70" />
-        <span className="h-2.5 w-2.5 rounded-full bg-primary/70" />
-        <span className="ml-3 hidden rounded-md bg-background px-3 py-1 text-[11px] text-muted sm:block">
-          app.sonetstock.ai/dashboard
-        </span>
-      </div>
-      <div className="grid grid-cols-[56px_1fr] sm:grid-cols-[180px_1fr]">
-        {/* sidebar */}
-        <div className="hidden flex-col gap-1 border-r border-border bg-secondary/60 p-3 sm:flex">
-          <div className="mb-2 flex items-center gap-2 px-1">
-            <Sparkles size={14} className="text-primaryBright" />
-            <span className="text-xs font-bold text-foreground">SONET STOCK AI</span>
-          </div>
-          {["Dashboard", "Metadata", "Prompts", "Research", "Calendar", "Batch jobs"].map((l, i) => (
-            <div
-              key={l}
-              className={`rounded-lg px-2.5 py-1.5 text-[11px] ${i === 0 ? "bg-primary/20 text-primaryBright" : "text-muted"}`}
-            >
-              {l}
-            </div>
-          ))}
-        </div>
-        {/* main */}
-        <div className="p-4 sm:p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <div className="text-sm font-semibold text-foreground">Workspace overview</div>
-              <div className="text-[11px] text-muted">Your on-device workspace</div>
-            </div>
-          </div>
-          <div className="mb-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-            {[
-              ["Images processed", "0"],
-              ["Metadata records", "0"],
-              ["Prompts saved", "0"],
-              ["Research notes", "0"],
-            ].map(([label, val]) => (
-              <div key={label} className="rounded-2xl border border-border bg-secondary/60 p-3">
-                <div className="text-[10px] uppercase tracking-wide text-muted">{label}</div>
-                <div className="mt-0.5 text-xl font-bold text-foreground">{val}</div>
-              </div>
-            ))}
-          </div>
-          <div className="grid gap-2.5 sm:grid-cols-2">
-            <div className="rounded-2xl border border-border bg-secondary/60 p-3">
-              <div className="mb-2 text-[11px] font-medium text-foreground">
-                Weekly activity
-              </div>
-              <div className="flex h-20 items-end gap-1.5">
-                {bars.map((h, i) => (
-                  <div key={i} className="flex-1 rounded-sm bg-primary/70" style={{ height: `${h}%` }} />
-                ))}
-              </div>
-            </div>
-            <div className="rounded-2xl border border-border bg-secondary/60 p-3">
-              <div className="mb-2 text-[11px] font-medium text-foreground">Recent jobs</div>
-              {[
-                ["Eid campaign metadata", "completed", "info"],
-                ["Portrait batch upscaling", "processing", "amber"],
-                ["Winter keyword research", "completed", "info"],
-              ].map(([t, s, tone]) => (
-                <div key={t} className="mb-1.5 flex items-center justify-between rounded-lg bg-background px-2.5 py-1.5">
-                  <span className="text-[11px] text-foreground">{t}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[9px] ${tone === "info" ? "bg-primary/15 text-primaryBright" : "bg-amber-500/15 text-amber-400"}`}>{s}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-      <p className="border-t border-border bg-secondary/40 px-4 py-2 text-center text-[10px] text-muted">
-        Preview mock-up — your real workspace starts empty. No marketplace data shown.
-      </p>
-    </div>
-  );
-}
+const NAV_LINKS: Array<[string, string]> = [
+  ["/dashboard", "Tools"],
+  ["/image-upscaler", "Image Studio"],
+  ["/stock-analysis", "Stock Intelligence"],
+  ["/event-calendar", "Event Calendar"],
+  ["/help", "Pricing"],
+];
+
+const HERO_PILLS: Array<{
+  href: string;
+  icon: React.ComponentType<{ size?: number | string; className?: string }>;
+  label: string;
+  primary?: boolean;
+}> = [
+  { href: "/dashboard", icon: LayoutDashboard, label: "Open Dashboard", primary: true },
+  { href: "#tools", icon: Wand2, label: "Explore All Tools" },
+  { href: "/metadata-generator", icon: FileText, label: "Metadata" },
+  { href: "/prompt-generator", icon: PencilLine, label: "Prompts" },
+  { href: "/image-upscaler", icon: ZoomIn, label: "Image Studio" },
+  { href: "/stock-analysis", icon: Compass, label: "Stock Intelligence" },
+];
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -234,82 +176,133 @@ export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* top nav */}
-      <header className="sticky top-0 z-40 border-b border-border bg-[#0c0f0d]/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white">
-              <Sparkles size={18} />
-            </span>
-            <span className="text-sm font-extrabold tracking-tight">
-              SONET <span className="text-primaryBright">STOCK AI</span>
-            </span>
-          </Link>
-          <nav className="hidden items-center gap-6 text-sm text-muted md:flex">
-            <a href="#tools" className="transition-colors hover:text-foreground">AI Tools</a>
-            <a href="#workflow" className="transition-colors hover:text-foreground">Workflow</a>
-            <a href="#platforms" className="transition-colors hover:text-foreground">Platforms</a>
-            <a href="#faq" className="transition-colors hover:text-foreground">FAQ</a>
-          </nav>
-          <div className="hidden items-center gap-2 md:flex">
-            <Link href="/dashboard" className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-white transition-all hover:brightness-110">
-              <LayoutDashboard size={16} /> Open Workspace
+      {/* ===== CINEMATIC HERO ===== */}
+      <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black">
+        <Image
+          src="/hero-cinematic.jpg"
+          alt="Photographer silhouetted with a tripod against a glowing foggy city skyline at night"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        {/* legibility overlays */}
+        <div className="absolute inset-0 bg-black/45" aria-hidden="true" />
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/75 to-transparent" aria-hidden="true" />
+        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-background via-background/60 to-transparent" aria-hidden="true" />
+
+        {/* nav */}
+        <header className="relative z-10">
+          <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6">
+            <Link href="/" className="flex items-center gap-2.5">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-black/40">
+                <Sparkles size={19} />
+              </span>
+              <span className="leading-tight">
+                <span className="block text-base font-extrabold tracking-tight text-white">
+                  SONET STOCK AI
+                </span>
+                <span className="block text-[10px] font-medium uppercase tracking-[0.22em] text-white/60">
+                  Creative Production Lab
+                </span>
+              </span>
             </Link>
-          </div>
-          <button className="rounded-lg p-2 text-muted md:hidden" aria-label="Toggle menu" onClick={() => setMenuOpen((o) => !o)}>
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-        {menuOpen && (
-          <nav className="border-t border-border px-4 py-3 md:hidden">
-            <div className="flex flex-col gap-1 text-sm">
-              {[
-                ["#tools", "AI Tools"],
-                ["#workflow", "Workflow"],
-                ["#platforms", "Platforms"],
-                ["#faq", "FAQ"],
-              ].map(([href, label]) => (
-                <a key={href} href={href} onClick={() => setMenuOpen(false)} className="rounded-lg px-3 py-2 text-muted hover:bg-secondary hover:text-foreground">
+            <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
+              {NAV_LINKS.map(([href, label]) => (
+                <Link
+                  key={label}
+                  href={href}
+                  className="text-sm font-medium text-white/75 transition-colors hover:text-white"
+                >
                   {label}
-                </a>
+                </Link>
               ))}
-              <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="mt-1 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-white">
-                <LayoutDashboard size={16} /> Open Workspace
+            </nav>
+            <div className="hidden lg:block">
+              <Link
+                href="/dashboard"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-white shadow-lg shadow-black/30 transition-all hover:brightness-110"
+              >
+                Get Started <ArrowRight size={16} />
               </Link>
             </div>
-          </nav>
-        )}
-      </header>
+            <button
+              className="rounded-lg p-2 text-white lg:hidden"
+              aria-label="Toggle menu"
+              onClick={() => setMenuOpen((o) => !o)}
+            >
+              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
+          {menuOpen && (
+            <nav className="mx-4 rounded-2xl border border-white/10 bg-black/70 p-3 backdrop-blur-md lg:hidden" aria-label="Mobile">
+              <div className="flex flex-col gap-1">
+                {NAV_LINKS.map(([href, label]) => (
+                  <Link
+                    key={label}
+                    href={href}
+                    onClick={() => setMenuOpen(false)}
+                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
+                  >
+                    {label}
+                  </Link>
+                ))}
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMenuOpen(false)}
+                  className="mt-1 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white"
+                >
+                  Get Started <ArrowRight size={16} />
+                </Link>
+              </div>
+            </nav>
+          )}
+        </header>
 
-      {/* hero */}
-      <section className="mx-auto max-w-6xl px-4 pb-16 pt-16 sm:px-6 md:pt-24">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primaryBright">
-            <Sparkles size={13} /> On-device workspace for stock contributors
-          </span>
-          <h1 className="text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
-            Ideas Become Income.<br />
-            Create Smarter with AI.
+        {/* headline */}
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-4 py-14 text-center sm:px-6">
+          <h1 className="relative inline-block select-none">
+            <span
+              className={`${anton.className} block text-[clamp(4rem,14vw,11rem)] leading-[0.9] tracking-tight text-white drop-shadow-[0_6px_30px_rgba(0,0,0,0.85)]`}
+            >
+              CREATE BIG
+            </span>
+            <span
+              className={`${caveat.className} absolute -bottom-[0.42em] right-[0.02em] -rotate-3 text-[clamp(2.75rem,8vw,6rem)] font-bold leading-none text-primaryBright drop-shadow-[0_4px_20px_rgba(0,0,0,0.85)]`}
+            >
+              ger!
+            </span>
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted md:text-lg">
-            Research stock trends, generate commercial-ready prompts, optimize metadata, and manage your creative workflow from one workspace.
+          <p className="mt-10 max-w-xl text-base font-medium text-white/85 md:text-lg">
+            Research Smarter. Create Faster. Earn Strategically.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/dashboard" className="inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-7 text-base font-semibold text-white transition-all hover:brightness-110">
-              <LayoutDashboard size={18} /> Open Workspace <ArrowRight size={18} />
-            </Link>
-            <a href="#tools" className="inline-flex h-12 items-center gap-2 rounded-xl border border-border bg-secondary px-7 text-base font-medium text-foreground transition-all hover:bg-card">
-              <Wand2 size={18} /> Explore AI Tools
-            </a>
-          </div>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted">
-            {["100% on-device", "No account or API key needed", "Export anytime"].map((t) => (
-              <span key={t} className="inline-flex items-center gap-1.5"><Check size={13} className="text-primaryBright" />{t}</span>
-            ))}
-          </div>
         </div>
-        <div className="mx-auto mt-14 max-w-4xl">
-          <PreviewMock />
+
+        {/* CTA pills */}
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-14 sm:px-6">
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {HERO_PILLS.map((p) => {
+              const cls = p.primary
+                ? "inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-white shadow-lg shadow-black/30 transition-all hover:brightness-110"
+                : "inline-flex h-12 items-center gap-2 rounded-full border border-white/25 bg-white/[0.06] px-5 text-sm font-medium text-white backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/[0.12]";
+              const inner = (
+                <>
+                  <p.icon size={16} />
+                  {p.label}
+                  {p.primary && <ArrowRight size={16} />}
+                </>
+              );
+              return p.href.startsWith("#") ? (
+                <a key={p.label} href={p.href} className={cls}>
+                  {inner}
+                </a>
+              ) : (
+                <Link key={p.label} href={p.href} className={cls}>
+                  {inner}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </section>
 
