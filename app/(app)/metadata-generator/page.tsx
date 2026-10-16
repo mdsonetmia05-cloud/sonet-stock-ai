@@ -21,10 +21,9 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useAuth } from "@/components/providers";
 import {
   bumpUsage,
-  dbFor,
+  localDb,
   type Job,
   type MetadataRecord,
   type UserPreferences,
@@ -134,8 +133,7 @@ const CSV_COLUMNS = ["Filename", "Title", "Description", "Keywords", "Category",
 /* ------------------------------------------------------------------ */
 
 export default function MetadataGeneratorPage() {
-  const { user } = useAuth();
-  const db = useMemo(() => (user ? dbFor(user.id) : null), [user]);
+  const db = useMemo(() => localDb(), []);
 
   const [items, setItems] = useState<WorkFile[]>([]);
   const [settings, setSettings] = useState<MetadataSettings>(() =>
@@ -172,7 +170,7 @@ export default function MetadataGeneratorPage() {
       /* keep defaults */
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, []);
 
   /* Revoke previews on unmount */
   useEffect(() => {
@@ -619,7 +617,7 @@ export default function MetadataGeneratorPage() {
 
   const kindBadge = (f: WorkFile) => {
     if (f.status === "error") return <Badge tone="red">Error</Badge>;
-    if (f.status === "analyzing" || f.status === "queued") return <Badge tone="blue">Analyzing…</Badge>;
+    if (f.status === "analyzing" || f.status === "queued") return <Badge tone="info">Analyzing…</Badge>;
     if (f.kind === "raster") return <Badge tone="success">Vision-analyzed</Badge>;
     if (f.kind === "svg") return <Badge tone="amber">Metadata-only</Badge>;
     return <Badge tone="neutral">Manual flow</Badge>;
@@ -637,7 +635,7 @@ export default function MetadataGeneratorPage() {
       return (
         <p className="mt-2 flex items-start gap-2 text-xs text-amber-400">
           <Info size={14} className="mt-0.5 shrink-0" aria-hidden />
-          Cannot be vision-analyzed on-device in demo mode. Use the manual metadata flow below.
+          Use the manual metadata flow below for full control over every field.
         </p>
       );
     return null;
@@ -782,7 +780,7 @@ export default function MetadataGeneratorPage() {
                       type="checkbox"
                       checked={settings[key]}
                       onChange={(e) => setSettings((s) => ({ ...s, [key]: e.target.checked }))}
-                      className="h-4 w-4 accent-[#2563EB]"
+                      className="h-4 w-4 accent-[#25C96A]"
                     />
                     {label}
                   </label>
@@ -1010,7 +1008,7 @@ export default function MetadataGeneratorPage() {
       {/* EXIF honesty note */}
       {doneCount > 0 && (
         <p className="mt-6 rounded-xl border border-border bg-card px-4 py-3 text-xs text-muted">
-          Metadata embedding (EXIF/IPTC) is not performed in this demo build — use the CSV for platform upload.
+          Metadata embedding (EXIF/IPTC) is not performed — use the CSV export for platform upload.
         </p>
       )}
     </div>

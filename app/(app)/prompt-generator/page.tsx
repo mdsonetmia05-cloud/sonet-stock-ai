@@ -26,8 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileDropzone } from "@/components/ui/file-dropzone";
 import { ConfirmDialog } from "@/components/ui/dialog";
-import { useAuth } from "@/components/providers";
-import { dbFor, bumpUsage, type PromptRecord } from "@/lib/db";
+import { localDb, bumpUsage, type PromptRecord } from "@/lib/db";
 import { downloadCsv, downloadTextFile } from "@/lib/csv";
 import {
   loadImageFromFile,
@@ -229,7 +228,7 @@ const ASSET_PRESETS: AssetPreset[] = [
   { id: "cgi", label: "CGI", icon: Box, category: "cgi-ads", outputType: "image", visualStyle: "3D Render", lighting: "Studio softbox", outputFormat: "PNG" },
 ];
 
-// ---------- Prompt assembly (demo: on-device templates) ----------
+// ---------- Prompt assembly (on-device templates) ----------
 
 interface GeneratorInputs {
   idea: string;
@@ -305,7 +304,7 @@ function buildSpecs(i: GeneratorInputs): string {
   ].join("\n");
 }
 
-/** Three honest rewordings of the main prompt (demo assembly, not AI). */
+/** Three rewordings of the main prompt (template assembly). */
 function buildVariations(main: string): string[] {
   const clauses = main.split(". ").filter(Boolean);
   const v1 = [...clauses].reverse().join(". ") + (clauses.length ? "." : "");
@@ -341,8 +340,7 @@ interface ReferenceState {
 // ---------- Page ----------
 
 export default function PromptGeneratorPage() {
-  const { user } = useAuth();
-  const db = useMemo(() => dbFor(user?.id ?? "demo-user"), [user?.id]);
+  const db = useMemo(() => localDb(), []);
 
   const [idea, setIdea] = useState("");
   const [category, setCategory] = useState("stock-photo");
@@ -547,7 +545,7 @@ export default function PromptGeneratorPage() {
     const cat = CATEGORIES.find((c) => c.id === category) ?? CATEGORIES[0];
     const text = [
       `PROMPT GENERATOR — ${cat.label}`,
-      `Generated: ${generated.createdAt} (demo template assembly)`,
+      `Generated: ${generated.createdAt} (template assembly)`,
       "",
       "MAIN PROMPT",
       generated.main,
@@ -595,7 +593,7 @@ export default function PromptGeneratorPage() {
     <div>
       <PageHeader
         title="Prompt Generator"
-        description="Assemble detailed generator prompts from 13 category templates plus your own controls. Everything is built on-device from templates — demo mode, not a real AI model."
+        description="Assemble detailed generator prompts from 13 category templates plus your own controls. Everything is built on-device from templates — no API key needed."
       />
 
       <div className="mb-6 flex items-start gap-2 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
@@ -819,9 +817,7 @@ export default function PromptGeneratorPage() {
               />
             ) : (
               <div className="flex flex-col gap-4">
-                <Badge tone="amber" className="w-fit">Demo template — assembled on-device, not AI-generated</Badge>
-
-                <div>
+                                <div>
                   <div className="mb-1.5 flex items-center justify-between">
                     <Label>Main prompt</Label>
                     <div className="flex gap-2">
@@ -905,7 +901,7 @@ export default function PromptGeneratorPage() {
                   <div key={p.id} className="rounded-xl border border-border bg-secondary/50 p-3">
                     <div className="mb-1.5 flex items-center justify-between gap-2">
                       <div className="flex min-w-0 items-center gap-2">
-                        <Badge tone="blue">{p.category}</Badge>
+                        <Badge tone="info">{p.category}</Badge>
                         <span className="truncate text-[11px] text-muted">{formatDateTime(p.createdAt)}</span>
                       </div>
                       <div className="flex shrink-0 gap-1">
