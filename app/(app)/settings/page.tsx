@@ -168,7 +168,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={prefs.singleWordKeywords}
                 onChange={(e) => setPrefs({ ...prefs, singleWordKeywords: e.target.checked })}
-                className="h-4 w-4 accent-[#25C96A]"
+                className="h-4 w-4 accent-[#C9A86A]"
                 aria-label="Use single-word keywords"
               />
               <span className="text-sm text-foreground">

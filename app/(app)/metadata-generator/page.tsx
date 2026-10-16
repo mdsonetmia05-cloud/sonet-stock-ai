@@ -780,7 +780,7 @@ export default function MetadataGeneratorPage() {
                       type="checkbox"
                       checked={settings[key]}
                       onChange={(e) => setSettings((s) => ({ ...s, [key]: e.target.checked }))}
-                      className="h-4 w-4 accent-[#25C96A]"
+                      className="h-4 w-4 accent-[#C9A86A]"
                     />
                     {label}
                   </label>
