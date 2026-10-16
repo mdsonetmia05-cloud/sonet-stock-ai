@@ -4,12 +4,15 @@
  * Two kinds of providers exist:
  * 1. The built-in on-device engine — always available, runs in the browser.
  *    Image analysis, metadata assembly and prompt tools use it. No API key needed.
- * 2. Server-side providers (Gemini / OpenAI / Anthropic) — optional. They are
- *    enabled by setting the matching API key as a server environment variable;
- *    /api/ai reports their status (never the keys).
+ * 2. Free-tier cloud providers (Gemini / Groq / OpenRouter) — optional, via the
+ *    client-key model in lib/ai-providers.ts: the user pastes a free API key in
+ *    Settings, it lives only in browser localStorage, and /api/ai POST forwards
+ *    each request server-side with the key used transiently (never stored/logged).
+ *    Legacy server-env keys (GEMINI_API_KEY etc.) are still reported by GET /api/ai.
  *
  * RULES:
- * - Never put API keys in frontend code, browser storage, or client requests.
+ * - Never put API keys in frontend code or commit them anywhere.
+ * - Never log or persist keys server-side.
  * - Never claim a server-side AI operation ran when it did not.
  */
 
