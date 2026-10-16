@@ -143,7 +143,7 @@ export default function HelpPage() {
             "Generate marketplace metadata, export as CSV, and submit on each platform's site.",
           ].map((step, i) => (
             <li key={i} className="flex items-start gap-3 text-sm text-muted">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-onPrimary">
                 {i + 1}
               </span>
               <span className="pt-0.5">{step}</span>

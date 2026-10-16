@@ -227,7 +227,7 @@ export default function EventCalendarPage() {
                 className={cn(
                   "rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors",
                   month === i
-                    ? "border-primary bg-primary text-white"
+                    ? "border-primary bg-primary text-onPrimary"
                     : "border-border bg-secondary text-muted hover:text-foreground hover:border-primary",
                 )}
               >
