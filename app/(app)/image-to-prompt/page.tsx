@@ -25,6 +25,7 @@ import { Progress } from "@/components/ui/progress";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileDropzone } from "@/components/ui/file-dropzone";
 import { ConfirmDialog } from "@/components/ui/dialog";
+import { AiEnhanceButton } from "@/components/ui/ai-enhance-button";
 import { localDb, bumpUsage } from "@/lib/db";
 import { downloadCsv, downloadTextFile } from "@/lib/csv";
 import {
@@ -257,6 +258,29 @@ export default function ImageToPromptPage() {
   const [progress, setProgress] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
+
+  // AI enhancement (optional, additive) per image.
+  const [aiEnhanced, setAiEnhanced] = useState<Record<string, { status: "ok" | "error"; text?: string; error?: string }>>({});
+
+  const useAiPrompt = (id: string) => {
+    const ai = aiEnhanced[id];
+    const text = ai?.status === "ok" ? ai.text : undefined;
+    if (!text) return;
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, prompt: text } : i)));
+    setAiEnhanced((s) => {
+      const next = { ...s };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const dismissAi = (id: string) => {
+    setAiEnhanced((s) => {
+      const next = { ...s };
+      delete next[id];
+      return next;
+    });
+  };
 
   const [mode, setMode] = useState<ModeId>("photorealistic");
   const [aspect, setAspect] = useState("1:1");
@@ -503,8 +527,8 @@ export default function ImageToPromptPage() {
   return (
     <div>
       <PageHeader
-        title="Image → Prompt"
-        description="Upload reference photos. Each image is measured on-device (dimensions, lighting, palette) and turned into a detailed, ready-to-use generator prompt — no AI, no cloud upload."
+        title="Image to Prompt"
+        description="Measure images on-device, turn them into generator prompts."
       />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
@@ -652,11 +676,13 @@ export default function ImageToPromptPage() {
               <EmptyState
                 icon={<ImagePlus size={36} aria-hidden />}
                 title="No images yet"
-                description="Upload JPG, JPEG, PNG or WebP images to measure their visual attributes and build prompts from them."
+                description="Upload images to measure visual attributes and build prompts."
               />
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
-                {items.map((item) => (
+                {items.map((item) => {
+                  const ai = aiEnhanced[item.id];
+                  return (
                   <div key={item.id} className="flex flex-col overflow-hidden rounded-2xl border border-border bg-secondary/50">
                     <div className="relative aspect-video w-full overflow-hidden bg-black/20">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -729,9 +755,47 @@ export default function ImageToPromptPage() {
                         />
                       )}
 
+                      {ai?.status === "error" && (
+                        <p role="alert" className="text-xs text-danger">
+                          {ai.error}
+                        </p>
+                      )}
+                      {ai?.status === "ok" && ai.text && (
+                        <div className="rounded-xl border border-primary/40 bg-primary/5 p-3">
+                          <div className="mb-1.5 flex items-center justify-between">
+                            <Badge tone="info">AI-enhanced</Badge>
+                            <div className="flex gap-1">
+                              <Button size="sm" variant="primary" onClick={() => useAiPrompt(item.id)}>
+                                Use this
+                              </Button>
+                              <Button size="sm" variant="ghost" onClick={() => dismissAi(item.id)} aria-label="Dismiss AI result">
+                                <X size={14} aria-hidden />
+                              </Button>
+                            </div>
+                          </div>
+                          <p className="whitespace-pre-wrap text-xs leading-relaxed text-foreground">{ai.text}</p>
+                        </div>
+                      )}
+
                       <div className="mt-auto flex flex-wrap gap-2 pt-1">
                         {item.prompt && (
                           <>
+                            <AiEnhanceButton
+                              buildPrompt={() => ({
+                                system:
+                                  "You are a prompt engineer for AI image and video generators. Return only the improved prompt text — no preamble, no commentary.",
+                                prompt: [
+                                  "Improve this image generator prompt (assembled on-device from measured image attributes):",
+                                  "",
+                                  item.prompt ?? "",
+                                  "",
+                                  "Rules: tighter and more vivid; keep every concrete detail (subject, composition, lighting, palette, aspect); keep it ready for commercial stock generation.",
+                                  "Return ONLY the improved prompt text.",
+                                ].join("\n"),
+                              })}
+                              onResult={(t) => setAiEnhanced((s) => ({ ...s, [item.id]: { status: "ok", text: t } }))}
+                              onError={(m) => setAiEnhanced((s) => ({ ...s, [item.id]: { status: "error", error: m } }))}
+                            />
                             <Button size="sm" variant="secondary" onClick={() => copyText(item.prompt!, item.id)}>
                               {copiedId === item.id ? <Check size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
                               {copiedId === item.id ? "Copied" : "Copy"}
@@ -753,7 +817,8 @@ export default function ImageToPromptPage() {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </Card>
@@ -761,8 +826,7 @@ export default function ImageToPromptPage() {
       </div>
 
       <p className={cn("mt-6 text-xs text-muted")}>
-        Prompts are assembled on-device from measured image attributes and templates
-        model. Prompts do not guarantee marketplace acceptance, downloads, or sales.
+        Assembled on-device from measured attributes — no guarantee of marketplace acceptance.
       </p>
 
       <ConfirmDialog

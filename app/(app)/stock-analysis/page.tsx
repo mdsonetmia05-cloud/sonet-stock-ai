@@ -265,10 +265,10 @@ export default function StockAnalysisPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-8">
       <PageHeader
         title="Portfolio Analysis"
-        description="Upload a CSV of your own portfolio and get real breakdowns — by platform, category, asset type and keyword. Nothing here is estimated or sampled: every number comes from your file."
+        description="Upload a portfolio CSV — every number below comes from your file."
         actions={
           items.length > 0 && (
             <>
@@ -287,14 +287,14 @@ export default function StockAnalysisPage() {
       />
 
       {savedNote && (
-        <div className="mb-4 flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-sm text-primaryBright">
+        <div className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-sm text-primaryBright">
           <Check size={16} /> {savedNote}
         </div>
       )}
 
       {items.length === 0 ? (
         <div className="mx-auto max-w-2xl">
-          <Card>
+          <Card className="p-6">
             <FileDropzone
               accept=".csv,text/csv"
               multiple={false}
@@ -308,14 +308,14 @@ export default function StockAnalysisPage() {
                 {parseError}
               </p>
             )}
-            <div className="mt-4 rounded-xl bg-secondary/60 p-4 text-sm text-muted">
+            <div className="mt-5 rounded-xl bg-secondary/60 p-4 text-sm text-muted">
               <p className="mb-2 flex items-center gap-2 font-medium text-foreground">
                 <Table2 size={15} /> Expected CSV format
               </p>
-              <p className="mb-2 text-xs leading-relaxed">
-                Headers (flexible naming): <code className="text-foreground">title, platform, assetType, category, keywords, downloads, uploadDate</code>.
-                Keywords can be separated by <code className="text-foreground">;</code> or <code className="text-foreground">,</code>.
-                The <code className="text-foreground">downloads</code> column is optional — include it to analyze per-asset performance.
+              <p className="mb-3 text-xs leading-relaxed">
+                Flexible headers: <code className="text-foreground">title, platform, assetType, category, keywords, downloads, uploadDate</code>.
+                Separate keywords with <code className="text-foreground">;</code> or <code className="text-foreground">,</code>.
+                The <code className="text-foreground">downloads</code> column is optional — add it for per-asset performance.
               </p>
               <Button size="sm" variant="secondary" onClick={downloadTemplate}>
                 <FileDown size={14} /> Download CSV template
@@ -325,11 +325,11 @@ export default function StockAnalysisPage() {
         </div>
       ) : (
         <>
-          <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3">
+          <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4">
             <Upload size={16} className="text-primaryBright" />
             <p className="text-sm text-foreground">
               <span className="font-semibold">{fileName}</span>
-              <span className="text-muted"> — {items.length} assets loaded from your file</span>
+              <span className="text-muted"> — {items.length} assets</span>
             </p>
             <div className="ml-auto flex gap-2">
               <Button size="sm" variant="secondary" onClick={downloadTemplate}>
@@ -342,13 +342,13 @@ export default function StockAnalysisPage() {
           </div>
 
           {/* Stats */}
-          <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatCard label="Assets analyzed" value={stats.total} icon={<BarChart3 size={18} />} hint="Rows in your upload (after filters)" />
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <StatCard label="Assets analyzed" value={stats.total} icon={<BarChart3 size={18} />} hint="Rows after filters" />
             <StatCard
               label="Total downloads"
               value={stats.totalDownloads !== null ? stats.totalDownloads.toLocaleString() : "—"}
               icon={<Download size={18} />}
-              hint={stats.totalDownloads !== null ? `From ${stats.downloadsCoverage} assets with download data` : "Add a downloads column to see this"}
+              hint={stats.totalDownloads !== null ? `From ${stats.downloadsCoverage} assets` : "Add a downloads column"}
             />
             <StatCard
               label="Avg downloads / asset"
@@ -356,11 +356,11 @@ export default function StockAnalysisPage() {
               icon={<BarChart3 size={18} />}
               hint="From your downloads column"
             />
-            <StatCard label="Platforms" value={stats.byPlatform.length} icon={<Table2 size={18} />} hint="Distinct platforms in your file" />
+            <StatCard label="Platforms" value={stats.byPlatform.length} icon={<Table2 size={18} />} hint="In your file" />
           </div>
 
           {/* Filters */}
-          <Card className="mb-6">
+          <Card className="p-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="lg:col-span-2">
                 <Label htmlFor="sa-query">Search your assets</Label>
@@ -399,13 +399,13 @@ export default function StockAnalysisPage() {
             <EmptyState
               icon={<Search size={40} />}
               title="No assets match"
-              description="Try a broader keyword or clear a filter."
+              description="Broaden the keyword or clear a filter."
               action={<Button variant="secondary" onClick={() => { setQuery(""); setPlatform("All"); setAssetType("All"); setCategory("All"); }}>Clear filters</Button>}
             />
           ) : (
             <>
               {/* Breakdowns */}
-              <div className="mb-6 grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-3">
                 {[
                   { title: "By platform", rows: stats.byPlatform },
                   { title: "By category", rows: stats.byCategory },
@@ -434,20 +434,20 @@ export default function StockAnalysisPage() {
               </div>
 
               {/* Observations + keywords */}
-              <div className="mb-6 grid gap-4 lg:grid-cols-2">
-                <Card>
+              <div className="grid gap-4 lg:grid-cols-2">
+                <Card className="p-6">
                   <CardHeader><p className="flex items-center gap-2 text-sm font-semibold text-foreground"><Lightbulb size={15} className="text-primaryBright" /> Observations</p></CardHeader>
-                  <p className="mb-3 text-xs text-muted">Computed from your uploaded data — not market benchmarks.</p>
+                  <p className="mb-3 text-xs text-muted">Computed from your file.</p>
                   <ul className="space-y-2">
                     {observations.map((o, i) => (
                       <li key={i} className="rounded-xl border border-border bg-secondary/50 p-3 text-xs leading-relaxed text-muted">{o}</li>
                     ))}
                   </ul>
                 </Card>
-                <Card>
+                <Card className="p-6">
                   <CardHeader><p className="text-sm font-semibold text-foreground">Top keywords in your portfolio</p></CardHeader>
                   {stats.topKeywords.length === 0 ? (
-                    <p className="text-sm text-muted">No keywords found in your file. Add a keywords column to see this.</p>
+                    <p className="text-sm text-muted">Add a keywords column to see this.</p>
                   ) : (
                     <div className="flex flex-wrap gap-1.5">
                       {stats.topKeywords.map(([k, n]) => (
@@ -467,33 +467,33 @@ export default function StockAnalysisPage() {
               </div>
 
               {/* Asset table */}
-              <Card>
+              <Card className="p-6">
                 <CardHeader><p className="text-sm font-semibold text-foreground">Assets</p></CardHeader>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-                        <th className="pb-2 pr-3 font-medium">Title</th>
-                        <th className="pb-2 pr-3 font-medium">Platform</th>
-                        <th className="pb-2 pr-3 font-medium">Type</th>
-                        <th className="pb-2 pr-3 font-medium">Category</th>
-                        <th className="pb-2 font-medium">Downloads</th>
+                      <tr className="border-b border-border text-left text-xs uppercase tracking-[0.08em] text-muted">
+                        <th className="pb-2.5 pr-3 font-medium">Title</th>
+                        <th className="pb-2.5 pr-3 font-medium">Platform</th>
+                        <th className="pb-2.5 pr-3 font-medium">Type</th>
+                        <th className="pb-2.5 pr-3 font-medium">Category</th>
+                        <th className="pb-2.5 font-medium">Downloads</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filtered.slice(0, 100).map((item) => (
-                        <tr key={item.id} className="border-b border-border/50 last:border-0">
-                          <td className="py-2.5 pr-3 font-medium text-foreground">{item.title}</td>
-                          <td className="py-2.5 pr-3"><Badge tone="info">{item.platform}</Badge></td>
-                          <td className="py-2.5 pr-3 text-muted">{item.assetType}</td>
-                          <td className="py-2.5 pr-3 text-muted">{item.category}</td>
-                          <td className="py-2.5 text-muted">{item.downloads !== null ? item.downloads.toLocaleString() : "—"}</td>
+                        <tr key={item.id} className="border-b border-border/50 transition-colors last:border-0 hover:bg-secondary/40">
+                          <td className="py-3 pr-3 font-medium text-foreground">{item.title}</td>
+                          <td className="py-3 pr-3"><Badge tone="info">{item.platform}</Badge></td>
+                          <td className="py-3 pr-3 text-muted">{item.assetType}</td>
+                          <td className="py-3 pr-3 text-muted">{item.category}</td>
+                          <td className="py-3 text-muted">{item.downloads !== null ? item.downloads.toLocaleString() : "—"}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                   {filtered.length > 100 && (
-                    <p className="mt-2 text-xs text-muted">Showing 100 of {filtered.length} — refine filters or export the full CSV.</p>
+                    <p className="mt-2 text-xs text-muted">100 of {filtered.length} shown — export for the full list.</p>
                   )}
                 </div>
               </Card>
@@ -502,11 +502,11 @@ export default function StockAnalysisPage() {
 
           {/* Saved analyses */}
           {savedProjects.length > 0 && (
-            <div className="mt-6">
+            <div>
               <h2 className="mb-3 text-lg font-semibold text-foreground">Saved analyses</h2>
               <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                 {savedProjects.map((p) => (
-                  <Card key={p.id} className="p-4">
+                  <Card key={p.id} className="p-4 transition-colors hover:border-primary/40">
                     <p className="font-medium text-foreground">{p.query}</p>
                     <p className="mt-1 text-xs text-muted">
                       {p.platform} · {p.assetType} · {p.category} · {p.resultCount} assets

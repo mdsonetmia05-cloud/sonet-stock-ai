@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   Images,
   FileText,
@@ -18,7 +18,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardHeader, CardTitle, StatCard } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
@@ -55,6 +55,18 @@ const SUGGESTED_TOPICS = [
   "Diverse hands using modern technology",
   "Seasonal festival decorations and lights",
 ];
+
+function Stat({ label, value, icon }: { label: string; value: string | number; icon: ReactNode }) {
+  return (
+    <Card className="p-5 transition-colors hover:border-primary/40">
+      <div className="flex items-center gap-3">
+        <span className="rounded-xl bg-primary/10 p-2.5 text-primaryBright">{icon}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
+      </div>
+      <p className="mt-5 text-4xl font-bold tracking-tight text-foreground">{value}</p>
+    </Card>
+  );
+}
 
 export default function DashboardPage() {
   const [tick, setTick] = useState(0);
@@ -148,10 +160,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-8">
       <PageHeader
         title="Dashboard"
-        description="Your local workspace at a glance. All counts come from activity recorded on this device."
+        description="Your local workspace, at a glance."
         actions={
           <Link href="/batch-editor">
             <Button size="sm">
@@ -162,31 +174,30 @@ export default function DashboardPage() {
       />
 
       {/* stats */}
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="Images processed" value={data.stats.imagesProcessed} icon={<Images size={18} />} hint="Local device processing only" />
-        <StatCard label="Metadata records" value={data.stats.metadata} icon={<FileText size={18} />} hint="Saved to local workspace" />
-        <StatCard label="Prompts created" value={data.stats.prompts} icon={<Wand2 size={18} />} hint="Saved prompt records" />
-        <StatCard label="Research projects" value={data.stats.research} icon={<Compass size={18} />} hint="Your research notes" />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat label="Images processed" value={data.stats.imagesProcessed} icon={<Images size={18} />} />
+        <Stat label="Metadata records" value={data.stats.metadata} icon={<FileText size={18} />} />
+        <Stat label="Prompts created" value={data.stats.prompts} icon={<Wand2 size={18} />} />
+        <Stat label="Research projects" value={data.stats.research} icon={<Compass size={18} />} />
       </div>
 
       {allZero && (
         <EmptyState
           icon={<Activity size={32} />}
-          title="Your workspace is empty — and that's expected"
-          description="These counters only grow when you use the tools. Nothing is pre-filled or estimated. Start with the metadata generator or prompt generator."
+          title="Workspace is empty"
+          description="Nothing here is estimated — these counters grow as you use the tools."
           action={
             <div className="flex flex-wrap justify-center gap-2">
               <Link href="/metadata-generator"><Button size="sm">Metadata Generator</Button></Link>
               <Link href="/prompt-generator"><Button size="sm" variant="secondary">Prompt Generator</Button></Link>
             </div>
           }
-          className="mb-6"
         />
       )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* recent jobs */}
-        <Card className="lg:col-span-2">
+        <Card className="p-6 lg:col-span-2">
           <CardHeader>
             <CardTitle>Recent jobs</CardTitle>
             <div className="flex flex-wrap items-center gap-2">
@@ -196,7 +207,7 @@ export default function DashboardPage() {
               <Link href="/history"><Button size="sm" variant="ghost">View all history</Button></Link>
             </div>
           </CardHeader>
-          <div className="mb-4 flex flex-col gap-2 sm:flex-row">
+          <div className="mb-5 flex flex-col gap-2 sm:flex-row">
             <div className="relative flex-1">
               <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               <Input
@@ -239,33 +250,33 @@ export default function DashboardPage() {
             <EmptyState
               icon={<Activity size={28} />}
               title="No jobs yet"
-              description="Run any tool — bulk upscaling, metadata generation, research — and it will appear here."
+              description="Run any tool and it will appear here."
             />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-                    <th className="pb-2 pr-3 font-medium">Title</th>
-                    <th className="pb-2 pr-3 font-medium">Type</th>
-                    <th className="pb-2 pr-3 font-medium">Status</th>
-                    <th className="pb-2 pr-3 font-medium">Progress</th>
-                    <th className="pb-2 pr-3 font-medium">Updated</th>
-                    <th className="pb-2 font-medium">Actions</th>
+                  <tr className="border-b border-border text-left text-xs uppercase tracking-[0.08em] text-muted">
+                    <th className="pb-2.5 pr-3 font-medium">Title</th>
+                    <th className="pb-2.5 pr-3 font-medium">Type</th>
+                    <th className="pb-2.5 pr-3 font-medium">Status</th>
+                    <th className="pb-2.5 pr-3 font-medium">Progress</th>
+                    <th className="pb-2.5 pr-3 font-medium">Updated</th>
+                    <th className="pb-2.5 font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentJobs.map((j) => (
-                    <tr key={j.id} className="border-b border-border/50 last:border-0">
-                      <td className="py-2.5 pr-3 font-medium text-foreground">{truncate(j.title, 40)}</td>
-                      <td className="py-2.5 pr-3 text-muted">{JOB_TYPE_LABEL[j.type] ?? j.type}</td>
-                      <td className="py-2.5 pr-3"><Badge tone={statusTone(j.status)}>{j.status}</Badge></td>
-                      <td className="py-2.5 pr-3 text-muted">
+                    <tr key={j.id} className="border-b border-border/50 transition-colors last:border-0 hover:bg-secondary/40">
+                      <td className="py-3 pr-3 font-medium text-foreground">{truncate(j.title, 40)}</td>
+                      <td className="py-3 pr-3 text-muted">{JOB_TYPE_LABEL[j.type] ?? j.type}</td>
+                      <td className="py-3 pr-3"><Badge tone={statusTone(j.status)}>{j.status}</Badge></td>
+                      <td className="py-3 pr-3 text-muted">
                         {j.total > 0 ? `${j.done}/${j.total}` : "—"}
                         {j.failed > 0 && <span className="ml-1 text-danger">({j.failed} failed)</span>}
                       </td>
-                      <td className="py-2.5 pr-3 text-muted">{formatDateTime(j.updatedAt)}</td>
-                      <td className="py-2.5">
+                      <td className="py-3 pr-3 text-muted">{formatDateTime(j.updatedAt)}</td>
+                      <td className="py-3">
                         <div className="flex items-center gap-1">
                           <Link href={JOB_ROUTE[j.type]} aria-label={`Reopen ${j.title} in ${JOB_TYPE_LABEL[j.type]}`}>
                             <Button size="sm" variant="ghost" title="Reopen in tool">
@@ -286,7 +297,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* job status summary */}
-        <Card>
+        <Card className="p-6">
           <CardHeader>
             <CardTitle>Job status summary</CardTitle>
           </CardHeader>
@@ -303,25 +314,25 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
-          <p className="mt-3 text-xs text-muted">
+          <p className="mt-4 text-xs text-muted">
             {data.statusCounts.failed ? (
               <span className="inline-flex items-center gap-1 text-amber-400">
-                <AlertTriangle size={12} /> {data.statusCounts.failed} failed job(s) — see History to review and retry.
+                <AlertTriangle size={12} /> {data.statusCounts.failed} failed — review in History.
               </span>
             ) : (
-              "Counts are computed from jobs on this device."
+              "Counts from jobs on this device."
             )}
           </p>
         </Card>
 
         {/* recent downloads */}
-        <Card>
+        <Card className="p-6">
           <CardHeader>
             <CardTitle>Recent downloads</CardTitle>
             <Link href="/history"><Button size="sm" variant="ghost">All</Button></Link>
           </CardHeader>
           {data.exports_.slice(0, 5).length === 0 ? (
-            <p className="text-sm text-muted">No downloads yet. Exports you make will be listed here.</p>
+            <p className="text-sm text-muted">Exports you make will appear here.</p>
           ) : (
             <ul className="flex flex-col gap-2">
               {data.exports_.slice(0, 5).map((e) => (
@@ -338,13 +349,13 @@ export default function DashboardPage() {
         </Card>
 
         {/* favorite prompts */}
-        <Card>
+        <Card className="p-6">
           <CardHeader>
             <CardTitle>Favorite prompts</CardTitle>
             <Link href="/prompt-generator"><Button size="sm" variant="ghost">Generate</Button></Link>
           </CardHeader>
           {data.favPrompts.length === 0 && data.favItems.length === 0 ? (
-            <p className="text-sm text-muted">No favorites yet. Star a prompt in the prompt generator to pin it here.</p>
+            <p className="text-sm text-muted">Star a prompt to pin it here.</p>
           ) : (
             <ul className="flex flex-col gap-2">
               {data.favPrompts.slice(0, 4).map((p) => (
@@ -365,13 +376,13 @@ export default function DashboardPage() {
         </Card>
 
         {/* upcoming events */}
-        <Card>
+        <Card className="p-6">
           <CardHeader>
             <CardTitle>Upcoming events</CardTitle>
             <Link href="/event-calendar"><Button size="sm" variant="ghost">Calendar</Button></Link>
           </CardHeader>
           {data.upcoming.length === 0 ? (
-            <p className="text-sm text-muted">No upcoming events in the curated calendar for this year.</p>
+            <p className="text-sm text-muted">No upcoming events this year.</p>
           ) : (
             <ul className="flex flex-col gap-2">
               {data.upcoming.map((e) => (
@@ -388,17 +399,17 @@ export default function DashboardPage() {
         </Card>
 
         {/* suggested topics */}
-        <Card className="lg:col-span-2">
+        <Card className="p-6 lg:col-span-2">
           <CardHeader>
             <CardTitle>Suggested topics to explore</CardTitle>
             <Badge tone="info">Suggestions</Badge>
           </CardHeader>
-          <p className="mb-3 text-xs text-muted">
-            Generic creative ideas, not market data — verify demand on each marketplace yourself before investing production time.
+          <p className="mb-4 text-xs text-muted">
+            Ideas, not market data — verify demand before producing.
           </p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {SUGGESTED_TOPICS.map((t) => (
-              <div key={t} className="flex items-start gap-2 rounded-xl border border-border bg-secondary/40 px-3 py-2.5">
+              <div key={t} className="flex items-start gap-2 rounded-xl border border-border bg-secondary/40 px-3 py-2.5 transition-colors hover:border-primary/40">
                 <Lightbulb size={14} className="mt-0.5 shrink-0 text-primaryBright" />
                 <span className="text-sm text-foreground">{t}</span>
               </div>
