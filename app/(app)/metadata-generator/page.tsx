@@ -38,7 +38,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { EmptyState } from "@/components/ui/empty-state";
 import { downloadCsv } from "@/lib/csv";
-import { loadImageFromFile, analyzeImage, type ImageAnalysis } from "@/lib/image";
+import { loadImageFromFile, analyzeImage, describeAnalysis, type ImageAnalysis } from "@/lib/image";
+import { AiEnhanceButton } from "@/components/ui/ai-enhance-button";
 import {
   MARKETPLACE_PROFILES,
   CONTENT_CATEGORIES,
@@ -64,6 +65,14 @@ import { cn, nowIso, uid } from "@/lib/utils";
 type FileKind = "raster" | "svg" | "manual" | "rejected";
 type MediaType = "image" | "video" | "vector" | "other";
 type ItemStatus = "queued" | "analyzing" | "ready" | "error";
+
+/** Per-item AI enhancement state — additive on top of the on-device fields. */
+interface AiEnhance {
+  status: "ok" | "error" | "raw";
+  parsed?: { title: string; description: string; keywords: string[] };
+  rawText?: string;
+  error?: string;
+}
 
 interface MetaFields {
   title: string;
@@ -154,6 +163,7 @@ export default function MetadataGeneratorPage() {
   const [notice, setNotice] = useState<{ tone: "success" | "red" | "amber"; text: string } | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [kwInputs, setKwInputs] = useState<Record<string, string>>({});
+  const [aiEnhance, setAiEnhance] = useState<Record<string, AiEnhance>>({});
 
   const processingRef = useRef(false);
   const jobIdRef = useRef<string | null>(null);
@@ -586,6 +596,148 @@ export default function MetadataGeneratorPage() {
     [updateFields],
   );
 
+  /* ---------------- AI enhancement (optional, additive) ---------------- */
+
+  /** Human-readable summary of the on-device analysis, for the AI prompt. */
+  const analysisSummary = (f: WorkFile): string => {
+    if (f.analysis) return describeAnalysis(f.analysis).join("; ");
+    if (f.kind === "svg" && f.svgHints) {
+      const h = f.svgHints;
+      return `SVG vector artwork${h.title ? ` titled "${h.title}"` : ""}${h.width && h.height ? `, canvas ${h.width}×${h.height}` : ""}.`;
+    }
+    if (f.kind === "manual") return "Manual flow — no on-device image analysis for this file type.";
+    return "No on-device analysis available.";
+  };
+
+  const enhanceMetadataPrompt = (f: WorkFile) => ({
+    system:
+      "You improve stock-photo metadata. Reply with ONLY the JSON object — no markdown fences, no commentary.",
+    prompt: [
+      `On-device image analysis (measured, not AI): ${analysisSummary(f)}.`,
+      "",
+      "Current draft metadata:",
+      `Title: ${f.fields.title}`,
+      `Description: ${f.fields.description}`,
+      `Keywords: ${f.fields.keywords.join(", ")}`,
+      `Category: ${f.fields.category}`,
+      "",
+      "Write improved metadata. Rules: title ≤ 20 words, plain, no hype; description 1–2 plain sentences; keywords: 25–35 single lowercase words, no duplicates.",
+      'Return JSON exactly in this shape: {"title": "...", "description": "...", "keywords": ["...", ...]}',
+    ].join("\n"),
+  });
+
+  const parseEnhancedMetadata = (
+    text: string,
+  ): { title: string; description: string; keywords: string[] } | null => {
+    const cleaned = text
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/```\s*$/i, "")
+      .trim();
+    try {
+      const obj = JSON.parse(cleaned) as {
+        title?: unknown;
+        description?: unknown;
+        keywords?: unknown;
+      };
+      if (typeof obj.title !== "string" || typeof obj.description !== "string" || !Array.isArray(obj.keywords))
+        return null;
+      const kws = obj.keywords
+        .filter((k): k is string => typeof k === "string")
+        .map((k) => k.trim())
+        .filter(Boolean);
+      if (!obj.title.trim() || !obj.description.trim() || kws.length === 0) return null;
+      return { title: obj.title.trim(), description: obj.description.trim(), keywords: kws };
+    } catch {
+      return null;
+    }
+  };
+
+  const handleAiResult = (f: WorkFile, text: string) => {
+    const parsed = parseEnhancedMetadata(text);
+    setAiEnhance((s) => ({
+      ...s,
+      [f.id]: parsed ? { status: "ok", parsed } : { status: "raw", rawText: text },
+    }));
+  };
+
+  const handleAiError = (id: string, message: string) => {
+    setAiEnhance((s) => ({ ...s, [id]: { status: "error", error: message } }));
+  };
+
+  const applyAiMetadata = (f: WorkFile) => {
+    const e = aiEnhance[f.id];
+    if (e?.status !== "ok" || !e.parsed) return;
+    updateFields(f.id, {
+      title: e.parsed.title,
+      description: e.parsed.description,
+      keywords: e.parsed.keywords,
+    });
+    flashNotice("success", `Applied AI-enhanced metadata for ${f.name}.`);
+  };
+
+  const dismissAi = (id: string) => {
+    setAiEnhance((s) => {
+      const next = { ...s };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const renderAiEnhanceBlock = (f: WorkFile) => {
+    const ai = aiEnhance[f.id];
+    if (!ai) return null;
+    if (ai.status === "error") {
+      return (
+        <p role="alert" className="rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
+          {ai.error ?? "The AI request failed. Please try again."}
+        </p>
+      );
+    }
+    if (ai.status === "raw") {
+      return (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/5 p-4">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <Badge tone="amber">AI-enhanced</Badge>
+            <Button variant="ghost" size="sm" onClick={() => dismissAi(f.id)} aria-label="Dismiss AI result">
+              <X size={14} aria-hidden />
+            </Button>
+          </div>
+          <p className="mb-2 text-xs text-muted">
+            The response couldn&apos;t be parsed as JSON — review the raw text.
+          </p>
+          <pre className="whitespace-pre-wrap rounded-lg border border-border bg-card p-3 text-xs leading-relaxed text-foreground">
+            {ai.rawText}
+          </pre>
+        </div>
+      );
+    }
+    if (ai.status === "ok" && ai.parsed) {
+      const p = ai.parsed;
+      return (
+        <div className="rounded-xl border border-primary/40 bg-primary/5 p-4">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <Badge tone="info">AI-enhanced</Badge>
+            <div className="flex gap-2">
+              <Button variant="primary" size="sm" onClick={() => applyAiMetadata(f)}>
+                <Check size={14} aria-hidden /> Apply
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => dismissAi(f.id)} aria-label="Dismiss AI result">
+                <X size={14} aria-hidden />
+              </Button>
+            </div>
+          </div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Title</p>
+          <p className="mb-2 text-sm text-foreground">{p.title}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Description</p>
+          <p className="mb-2 text-sm text-foreground">{p.description}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Keywords ({p.keywords.length})</p>
+          <p className="text-sm text-foreground">{p.keywords.join(", ")}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   /* ---------------- derived ---------------- */
 
   const total = items.length;
@@ -658,8 +810,8 @@ export default function MetadataGeneratorPage() {
   return (
     <div>
       <PageHeader
-        title="AI Metadata Generator"
-        description="Drop in your assets — titles, descriptions and ranked keywords are suggested on-device from image statistics and marketplace profile rules. Review everything before submitting; nothing here promises acceptance, downloads or sales."
+        title="Metadata"
+        description="Titles, descriptions and ranked keywords suggested on-device. Review before submitting."
       />
 
       {notice && (
@@ -899,6 +1051,8 @@ export default function MetadataGeneratorPage() {
                       </Button>
                     </div>
 
+                    {renderAiEnhanceBlock(f)}
+
                     <div>
                       <Label htmlFor={`title-${f.id}`}>Title ({f.fields.title.trim().split(/\s+/).filter(Boolean).length} words)</Label>
                       <Input
@@ -990,6 +1144,11 @@ export default function MetadataGeneratorPage() {
                       <Button variant="outline" size="sm" onClick={() => exportOneCsv(f)}>
                         <Download size={14} aria-hidden /> Download CSV
                       </Button>
+                      <AiEnhanceButton
+                        buildPrompt={() => enhanceMetadataPrompt(f)}
+                        onResult={(t) => handleAiResult(f, t)}
+                        onError={(m) => handleAiError(f.id, m)}
+                      />
                       <Button variant="ghost" size="sm" onClick={() => regenerateItem(f)} disabled={processing}>
                         <RefreshCw size={14} aria-hidden /> Regenerate
                       </Button>

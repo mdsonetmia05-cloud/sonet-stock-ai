@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileDropzone } from "@/components/ui/file-dropzone";
 import { ConfirmDialog } from "@/components/ui/dialog";
+import { AiEnhanceButton } from "@/components/ui/ai-enhance-button";
 import { localDb, bumpUsage, type PromptRecord } from "@/lib/db";
 import { downloadCsv, downloadTextFile } from "@/lib/csv";
 import {
@@ -372,6 +373,16 @@ export default function PromptGeneratorPage() {
   const [history, setHistory] = useState<PromptRecord[]>([]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // AI enhancement (optional, additive): tightened rewrite of the assembled prompt.
+  const [aiEnhanced, setAiEnhanced] = useState<{ status: "ok" | "error"; text?: string; error?: string } | null>(null);
+
+  const useAiPrompt = () => {
+    const text = aiEnhanced?.status === "ok" ? aiEnhanced.text : undefined;
+    if (!text) return;
+    setGenerated((g) => (g ? { ...g, main: text } : g));
+    setAiEnhanced(null);
+  };
+
   // Draft handoff: Image → Prompt (or Event Calendar) may write ssa:v1:draft:prompt-idea.
   useEffect(() => {
     try {
@@ -592,8 +603,8 @@ export default function PromptGeneratorPage() {
   return (
     <div>
       <PageHeader
-        title="Prompt Generator"
-        description="Assemble detailed generator prompts from 13 category templates plus your own controls. Everything is built on-device from templates — no API key needed."
+        title="Prompt Builder"
+        description="Assemble generator prompts from templates on-device."
       />
 
       <div className="mb-6 flex items-start gap-2 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
@@ -821,6 +832,23 @@ export default function PromptGeneratorPage() {
                   <div className="mb-1.5 flex items-center justify-between">
                     <Label>Main prompt</Label>
                     <div className="flex gap-2">
+                      <AiEnhanceButton
+                        buildPrompt={() => ({
+                          system:
+                            "You are a prompt engineer for AI image and video generators. Return only the improved prompt text — no preamble, no commentary.",
+                          prompt: [
+                            "Improve this generator prompt (assembled on-device from templates):",
+                            "",
+                            generated.main,
+                            "",
+                            "Rules: tighter and more vivid; keep every concrete detail (subject, composition, lighting, palette, aspect); keep it ready for commercial stock generation.",
+                            'Include the disclosure line "no watermarks, no logos, no trademarks" unless it is already there.',
+                            "Return ONLY the improved prompt text.",
+                          ].join("\n"),
+                        })}
+                        onResult={(t) => setAiEnhanced({ status: "ok", text: t })}
+                        onError={(m) => setAiEnhanced({ status: "error", error: m })}
+                      />
                       <Button size="sm" variant="secondary" onClick={() => copyText(generated.main, "main")}>
                         {copiedKey === "main" ? <Check size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
                         {copiedKey === "main" ? "Copied" : "Copy"}
@@ -833,6 +861,27 @@ export default function PromptGeneratorPage() {
                   <p className="whitespace-pre-wrap rounded-xl border border-border bg-secondary/50 p-4 text-sm leading-relaxed text-foreground">
                     {generated.main}
                   </p>
+                  {aiEnhanced?.status === "error" && (
+                    <p role="alert" className="mt-2 text-sm text-danger">
+                      {aiEnhanced.error}
+                    </p>
+                  )}
+                  {aiEnhanced?.status === "ok" && aiEnhanced.text && (
+                    <div className="mt-3 rounded-xl border border-primary/40 bg-primary/5 p-4">
+                      <div className="mb-1.5 flex items-center justify-between">
+                        <Badge tone="info">AI-enhanced</Badge>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="primary" onClick={useAiPrompt}>
+                            Use this prompt
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setAiEnhanced(null)} aria-label="Dismiss AI result">
+                            <X size={14} aria-hidden />
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{aiEnhanced.text}</p>
+                    </div>
+                  )}
                 </div>
 
                 <div>
